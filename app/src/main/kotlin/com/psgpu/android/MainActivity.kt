@@ -27,24 +27,22 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.psgpu.android.MainEvent.*
-import com.psgpu.android.ui.filter.TitleAndSelection
 import com.psgpu.android.ui.theme.PSGPU_androidTheme
 import com.psgpu.android.filter.PSFilterType
+import com.psgpu.android.ui.filter.FilterItem
+import com.psgpu.android.ui.filter.FilterItemState
 
 data class MainState(
     val bitmap: Bitmap? = null,
     val selectedFilter: PSFilterType? = null,
-    val filters: List<PSFilterType> = emptyList()
+    val filters: List<FilterItemState> = emptyList()
 )
 
 sealed class MainEvent {
     data object ResetFilter: MainEvent()
-    data class ApplyFilter(
-        val type: PSFilterType,
-        val parameters: FilterParameters? = null
-    ): MainEvent() {
-        interface FilterParameters
+    sealed class ApplyFilter(open val filterType: PSFilterType): MainEvent() {
+        data class NoParameterFilter(override val filterType: PSFilterType): ApplyFilter(filterType)
+        data class GaussianBlur(val radius: Float? = null, val sigma: Float? = null): ApplyFilter(PSFilterType.GAUSSIAN_BLUR)
     }
 }
 
@@ -86,7 +84,7 @@ private fun Screen(
         }
 
         // フィルター一覧
-        FilterList(state.filters, state.selectedFilter, onEvent)
+        FilterList(state.filters, selectedFilter = state.selectedFilter, onEvent)
     }
 }
 
@@ -148,7 +146,7 @@ private fun ColumnScope.ResetButton(
 
 @Composable
 private fun ColumnScope.FilterList(
-    filters: List<PSFilterType>,
+    filters: List<FilterItemState>,
     selectedFilter: PSFilterType?,
     onEvent: (MainEvent) -> Unit
 ) {
@@ -160,17 +158,7 @@ private fun ColumnScope.FilterList(
            .fillMaxWidth()
     ) {
         filters.forEach { filter ->
-            when (filter) {
-                PSFilterType.NO_FILTER, PSFilterType.GAUSSIAN_BLUR -> {
-                    TitleAndSelection(
-                        title = filter.title,
-                        selected = filter == selectedFilter,
-                        onSelect = {
-                            onEvent(ApplyFilter(type = filter))
-                        }
-                    )
-                }
-            }
+            FilterItem(state = filter, selected = selectedFilter == filter.filter)
         }
     }
 }

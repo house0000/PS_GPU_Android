@@ -10,6 +10,8 @@ class PSGroupFilter(
     val filters: List<PSFilter>
 ): PSFilter {
     private var glObjects: PSGLObjects = PSGLObjects()
+
+    constructor(vararg filterArgs: PSFilter) : this(filterArgs.toList())
     override fun releaseGLObjects() {
         // 多分大丈夫なんだけど一応逆から削除していく
         filters.reversed().forEach { it.releaseGLObjects() }

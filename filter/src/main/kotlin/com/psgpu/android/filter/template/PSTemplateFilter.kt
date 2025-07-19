@@ -25,7 +25,7 @@ import java.nio.ShortBuffer
 // シェーダとシェーダ内の変数だけ渡せばレンダリングしてくれるフィルター
 // デフォルトはPSNoFilterと同じ挙動
 open class PSTemplateFilter(
-    private val params: PSTemplateFilterParams = PSTemplateFilterParams()
+    protected val params: PSTemplateFilterParams = PSTemplateFilterParams()
 ): PSFilter {
     // シェーダーソース
     private val vertexShaderSrc = readShaderFile(PSFilter.getContext(), params.vertexShaderSrcPath)
@@ -176,6 +176,16 @@ open class PSTemplateFilter(
 
                     textureUnitSlotIndex++
                 }
+
+                is PSUniformParam.F1 -> {
+                    val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
+                    GLES20.glUniform1f(location, param.value)
+                }
+
+                is PSUniformParam.I1 -> {
+                    val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
+                    GLES20.glUniform1i(location, param.value)
+                }
             }
         }
 
@@ -229,6 +239,8 @@ open class PSTemplateFilter(
                         throw PSFilterException.InvalideInputBitmap
                     }
                 }
+
+                else -> {}
             }
         }
 
