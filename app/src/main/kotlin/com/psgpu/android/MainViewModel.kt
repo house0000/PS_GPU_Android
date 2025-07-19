@@ -7,11 +7,13 @@ import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.psgpu.android.filter.PSFilter
 import com.psgpu.android.filter.PSFilterException
 import com.psgpu.android.filter.PSFilterType
 import com.psgpu.android.filter.PSGaussianBlurFilter
 import com.psgpu.android.filter.PSNoFilter
 import com.psgpu.android.filter.template.PSTemplateFilter
+import com.psgpu.android.ui.filter.FilterItemState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.math.max
 
 sealed class MainMessage {
 
@@ -41,6 +44,8 @@ class MainViewModel(
         BitmapFactory.decodeResource(applicationContext.resources, R.drawable.test_image)
     }
 
+    private val filters: Map<PSFilterType, PSFilter> = allFilters()
+
     private val _state = MutableStateFlow(MainState())
     val state: StateFlow<MainState>
         get() = _state.asStateFlow()
@@ -56,33 +61,36 @@ class MainViewModel(
     fun onEvent(event: MainEvent) {
         when (event) {
             is MainEvent.ApplyFilter -> {
-                val filterType = event.type
-                when (filterType) {
-                    PSFilterType.NO_FILTER -> {
-                        val filter = PSTemplateFilter()
-                        val filteredBitmap = try {
+                // 選択されたフィルターを適用する
+                val filterType = event.filterType
+
+                val filteredBitmap =  when (event) {
+                    is MainEvent.ApplyFilter.GaussianBlur -> {
+                        val filter = filters[filterType] as PSGaussianBlurFilter
+                        filter.setParams(event.radius?.toInt(), event.sigma)
+                        try {
                             filter.apply(defaultBitmap)
                         } catch (e: PSFilterException) {
-                            Log.d("@@@", "PSNoFilter Error: $e")
-                            return
-                        }
-                        _state.update {
-                            it.copy(
-                                bitmap = filteredBitmap,
-                                selectedFilter = filterType
-                            )
+                            Log.d("@@@", "ApplyFilter error: $e")
+                            Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
                         }
                     }
-                    PSFilterType.GAUSSIAN_BLUR -> {
-                        val filter = PSGaussianBlurFilter()
-                        val filteredBitmap = filter.apply(defaultBitmap)
-                        _state.update {
-                            it.copy(
-                                bitmap = filteredBitmap,
-                                selectedFilter = filterType
-                            )
+                    is MainEvent.ApplyFilter.NoParameterFilter -> {
+                        val filter = filters[filterType]!!
+                        try {
+                            filter.apply(defaultBitmap)
+                        } catch (e: PSFilterException) {
+                            Log.d("@@@", "ApplyFilter error: $e")
+                            Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
                         }
                     }
+                }
+
+                _state.update {
+                    it.copy(
+                        bitmap = filteredBitmap,
+                        selectedFilter = filterType
+                    )
                 }
             }
             MainEvent.ResetFilter -> {
@@ -100,8 +108,57 @@ class MainViewModel(
         _state.update {
             it.copy(
                 bitmap = defaultBitmap,
-                filters = PSFilterType.entries
+                filters = PSFilterType.entries.map { filterType ->
+                    FilterItemState(
+                        filter = filterType,
+                        onSelect = {
+                            when (filterType) {
+                                PSFilterType.GAUSSIAN_BLUR -> {
+                                    onEvent(MainEvent.ApplyFilter.GaussianBlur())
+                                }
+                                else -> {
+                                    onEvent(MainEvent.ApplyFilter.NoParameterFilter(filterType))
+                                }
+                            }
+                        },
+                        sliders = when (filterType) {
+                            PSFilterType.GAUSSIAN_BLUR -> listOf(
+                                FilterItemState.SliderState(
+                                    title = "radius",
+                                    min = 0f,
+                                    max = 100f,
+                                    onSlide = { radius ->
+                                        onEvent(MainEvent.ApplyFilter.GaussianBlur(radius = radius))
+                                    }
+                                ),
+                                FilterItemState.SliderState(
+                                    title = "sigma",
+                                    min = 0.5f,
+                                    max = 100f,
+                                    onSlide = { sigma ->
+                                        onEvent(MainEvent.ApplyFilter.GaussianBlur(sigma = sigma))
+                                    }
+                                )
+                            )
+                            else -> emptyList()
+                        }
+                    )
+                }
             )
         }
     }
 }
+
+private fun allFilters(): Map<PSFilterType, PSFilter> = PSFilterType.entries
+    .let { types ->
+        val map = mutableMapOf<PSFilterType, PSFilter>()
+
+        types.forEach { type ->
+            map[type] = when (type) {
+                PSFilterType.NO_FILTER -> PSNoFilter()
+                PSFilterType.GAUSSIAN_BLUR -> PSGaussianBlurFilter()
+            }
+        }
+
+        return@let map
+    }
