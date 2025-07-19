@@ -39,8 +39,8 @@ void main() {
             totalGaussian += gaussian * 2.0;
 
             resultColor +=
-            texture2D(u_Texture, v_TexCoord + vec2(float(radius) / float(u_TextureHeight), 0.0)) * gaussian +
-            texture2D(u_Texture, v_TexCoord + vec2(- float(radius) / float(u_TextureHeight), 0.0)) * gaussian;
+                texture2D(u_Texture, v_TexCoord + vec2(0.0, float(radius) / float(u_TextureHeight))) * gaussian +
+                texture2D(u_Texture, v_TexCoord + vec2(0.0, - float(radius) / float(u_TextureHeight))) * gaussian;
         }
     }
 
