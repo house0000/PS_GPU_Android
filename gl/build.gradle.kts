@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.psgpu.android.filter"
+    namespace = "com.psgpu.android.gl"
     compileSdk = 36
 
     defaultConfig {
@@ -33,7 +33,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":gl"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

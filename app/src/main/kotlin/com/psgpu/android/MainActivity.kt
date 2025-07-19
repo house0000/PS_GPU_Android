@@ -27,9 +27,10 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.psgpu.android.MainEvent.*
 import com.psgpu.android.ui.filter.TitleAndSelection
 import com.psgpu.android.ui.theme.PSGPU_androidTheme
-import com.psgpu.filter.filter.PSFilterType
+import com.psgpu.android.filter.PSFilterType
 
 data class MainState(
     val bitmap: Bitmap? = null,
@@ -160,12 +161,12 @@ private fun ColumnScope.FilterList(
     ) {
         filters.forEach { filter ->
             when (filter) {
-                PSFilterType.GAUSSIAN_BLUR -> {
+                PSFilterType.NO_FILTER, PSFilterType.GAUSSIAN_BLUR -> {
                     TitleAndSelection(
-                        title = "GAUSSIAN BLUR",
+                        title = filter.title,
                         selected = filter == selectedFilter,
                         onSelect = {
-                            onEvent(MainEvent.ApplyFilter(type = PSFilterType.GAUSSIAN_BLUR))
+                            onEvent(ApplyFilter(type = filter))
                         }
                     )
                 }
