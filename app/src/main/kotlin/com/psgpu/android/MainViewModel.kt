@@ -12,6 +12,7 @@ import com.psgpu.android.filter.PSFilterException
 import com.psgpu.android.filter.PSFilterType
 import com.psgpu.android.filter.PSGaussianBlurFilter
 import com.psgpu.android.filter.PSNoFilter
+import com.psgpu.android.filter.PSSharpenFilter
 import com.psgpu.android.filter.template.PSTemplateFilter
 import com.psgpu.android.ui.filter.FilterItemState
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -84,6 +85,17 @@ class MainViewModel(
                             Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
                         }
                     }
+
+                    is MainEvent.ApplyFilter.Sharpen -> {
+                        val filter = filters[filterType] as PSSharpenFilter
+                        filter.setParams(event.intensity)
+                        try {
+                            filter.apply(defaultBitmap)
+                        } catch (e: PSFilterException) {
+                            Log.d("@@@", "ApplyFilter error: $e")
+                            Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
+                        }
+                    }
                 }
 
                 _state.update {
@@ -140,6 +152,16 @@ class MainViewModel(
                                     }
                                 )
                             )
+                            PSFilterType.SHARPEN -> listOf(
+                                FilterItemState.SliderState(
+                                    title = "intensity",
+                                    min = -10f,
+                                    max = 10f,
+                                    onSlide = { intensity ->
+                                        onEvent(MainEvent.ApplyFilter.Sharpen(intensity = intensity))
+                                    }
+                                ),
+                            )
                             else -> emptyList()
                         }
                     )
@@ -157,6 +179,7 @@ private fun allFilters(): Map<PSFilterType, PSFilter> = PSFilterType.entries
             map[type] = when (type) {
                 PSFilterType.NO_FILTER -> PSNoFilter()
                 PSFilterType.GAUSSIAN_BLUR -> PSGaussianBlurFilter()
+                PSFilterType.SHARPEN -> PSSharpenFilter()
             }
         }
 
