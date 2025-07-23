@@ -6,7 +6,8 @@ enum class PSFilterType {
     SHARPEN,
     SATURATION,
     CONTRAST,
-    ZOOM_BLUR;
+    ZOOM_BLUR,
+    VIGNETTE;
 
     val title: String
         get() {
@@ -17,6 +18,7 @@ enum class PSFilterType {
                 SATURATION -> "SATURATION"
                 CONTRAST -> "CONTRAST"
                 ZOOM_BLUR -> "ZOOM_BLUR"
+                VIGNETTE -> "VIGNETTE"
             }
         }
 }

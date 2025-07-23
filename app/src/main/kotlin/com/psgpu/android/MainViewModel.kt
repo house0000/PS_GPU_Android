@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -15,6 +16,7 @@ import com.psgpu.android.filter.PSGaussianBlurFilter
 import com.psgpu.android.filter.PSNoFilter
 import com.psgpu.android.filter.PSSaturationFilter
 import com.psgpu.android.filter.PSSharpenFilter
+import com.psgpu.android.filter.PSVignetteFilter
 import com.psgpu.android.filter.PSZoomBlurFilter
 import com.psgpu.android.filter.template.PSTemplateFilter
 import com.psgpu.android.ui.filter.FilterItemState
@@ -128,6 +130,30 @@ class MainViewModel(
                             event.intensity,
                             event.blurCenter,
                             event.samples
+                        )
+                        try {
+                            filter.apply(defaultBitmap)
+                        } catch (e: PSFilterException) {
+                            Log.d("@@@", "ApplyFilter error: $e")
+                            Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
+                        }
+                    }
+
+                    is MainEvent.ApplyFilter.Vignette -> {
+                        val filter = filters[filterType] as PSVignetteFilter
+                        val currentColor = filter.getVignetteColor().let { colorInt ->
+                            android.graphics.Color.valueOf(colorInt)
+                        }
+                        filter.setParams(
+                            event.vignetteStart,
+                            event.vignetteEnd,
+                            event.center,
+                            android.graphics.Color.argb(
+                                1f,
+                                event.colorRGB?.first ?: currentColor.red(),
+                                event.colorRGB?.second ?: currentColor.green(),
+                                event.colorRGB?.third ?: currentColor.blue()
+                            )
                         )
                         try {
                             filter.apply(defaultBitmap)
@@ -258,6 +284,65 @@ class MainViewModel(
                                     }
                                 )
                             )
+
+                            PSFilterType.VIGNETTE -> listOf(
+                                FilterItemState.SliderState(
+                                    title = "vignette start",
+                                    min = 0f,
+                                    max = 1.0f,
+                                    onSlide = { start ->
+                                        onEvent(MainEvent.ApplyFilter.Vignette(vignetteStart = start))
+                                    }
+                                ),
+                                FilterItemState.SliderState(
+                                    title = "vignette end",
+                                    min = 0f,
+                                    max = 1.0f,
+                                    onSlide = { end ->
+                                        onEvent(MainEvent.ApplyFilter.Vignette(vignetteEnd = end))
+                                    }
+                                ),
+                                FilterItemState.SliderState(
+                                    title = "center x",
+                                    min = 0f,
+                                    max = 1.0f,
+                                    onSlide = { x ->
+                                        onEvent(MainEvent.ApplyFilter.Vignette(center = Pair(x, null)))
+                                    }
+                                ),
+                                FilterItemState.SliderState(
+                                    title = "center y",
+                                    min = 0f,
+                                    max = 1.0f,
+                                    onSlide = { y ->
+                                        onEvent(MainEvent.ApplyFilter.Vignette(center = Pair(null, y)))
+                                    }
+                                ),
+                                FilterItemState.SliderState(
+                                    title = "R",
+                                    min = 0f,
+                                    max = 1.0f,
+                                    onSlide = { r ->
+                                        onEvent(MainEvent.ApplyFilter.Vignette(colorRGB = Triple(r, null, null)))
+                                    }
+                                ),
+                                FilterItemState.SliderState(
+                                    title = "G",
+                                    min = 0f,
+                                    max = 1.0f,
+                                    onSlide = { g ->
+                                        onEvent(MainEvent.ApplyFilter.Vignette(colorRGB = Triple(null, g, null)))
+                                    }
+                                ),
+                                FilterItemState.SliderState(
+                                    title = "B",
+                                    min = 0f,
+                                    max = 1.0f,
+                                    onSlide = { b ->
+                                        onEvent(MainEvent.ApplyFilter.Vignette(colorRGB = Triple(null, null, b)))
+                                    }
+                                )
+                            )
                             else -> emptyList()
                         }
                     )
@@ -279,6 +364,7 @@ private fun allFilters(): Map<PSFilterType, PSFilter> = PSFilterType.entries
                 PSFilterType.SATURATION -> PSSaturationFilter()
                 PSFilterType.CONTRAST -> PSContrastFilter()
                 PSFilterType.ZOOM_BLUR -> PSZoomBlurFilter()
+                PSFilterType.VIGNETTE -> PSVignetteFilter()
             }
         }
 

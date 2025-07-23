@@ -55,6 +55,13 @@ sealed class PSUniformParam {
         val valueY: Float
     ): PSUniformParam()
 
+    data class F3(
+        val nameOnShader: String,
+        val x: Float,
+        val y: Float,
+        val z: Float
+    ): PSUniformParam()
+
     data class I1(
         val nameOnShader: String,
         val value: Int

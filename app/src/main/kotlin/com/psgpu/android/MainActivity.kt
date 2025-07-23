@@ -59,6 +59,12 @@ sealed class MainEvent {
             val samples: Int? = null,
             val sigma: Float? = null
         ): ApplyFilter(PSFilterType.ZOOM_BLUR)
+        data class Vignette(
+            val vignetteStart: Float? = null,
+            val vignetteEnd: Float? = null,
+            val center: Pair<Float?, Float?>? = null,
+            val colorRGB: Triple<Float?, Float?, Float?>? = null
+        ): ApplyFilter(PSFilterType.VIGNETTE)
     }
 }
 
