@@ -44,6 +44,7 @@ sealed class MainEvent {
         data class NoParameterFilter(override val filterType: PSFilterType): ApplyFilter(filterType)
         data class GaussianBlur(val radius: Float? = null, val sigma: Float? = null): ApplyFilter(PSFilterType.GAUSSIAN_BLUR)
         data class Sharpen(val intensity: Float): ApplyFilter(PSFilterType.SHARPEN)
+        data class Saturation(val saturation: Float): ApplyFilter(PSFilterType.SATURATION)
     }
 }
 

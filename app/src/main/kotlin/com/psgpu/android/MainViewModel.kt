@@ -12,6 +12,7 @@ import com.psgpu.android.filter.PSFilterException
 import com.psgpu.android.filter.PSFilterType
 import com.psgpu.android.filter.PSGaussianBlurFilter
 import com.psgpu.android.filter.PSNoFilter
+import com.psgpu.android.filter.PSSaturationFilter
 import com.psgpu.android.filter.PSSharpenFilter
 import com.psgpu.android.filter.template.PSTemplateFilter
 import com.psgpu.android.ui.filter.FilterItemState
@@ -96,6 +97,17 @@ class MainViewModel(
                             Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
                         }
                     }
+
+                    is MainEvent.ApplyFilter.Saturation -> {
+                        val filter = filters[filterType] as PSSaturationFilter
+                        filter.setParams(event.saturation)
+                        try {
+                            filter.apply(defaultBitmap)
+                        } catch (e: PSFilterException) {
+                            Log.d("@@@", "ApplyFilter error: $e")
+                            Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
+                        }
+                    }
                 }
 
                 _state.update {
@@ -162,6 +174,16 @@ class MainViewModel(
                                     }
                                 ),
                             )
+                            PSFilterType.SATURATION -> listOf(
+                                FilterItemState.SliderState(
+                                    title = "saturation",
+                                    min = 0f,
+                                    max = 3f,
+                                    onSlide = { saturation ->
+                                        onEvent(MainEvent.ApplyFilter.Saturation(saturation))
+                                    }
+                                ),
+                            )
                             else -> emptyList()
                         }
                     )
@@ -180,6 +202,7 @@ private fun allFilters(): Map<PSFilterType, PSFilter> = PSFilterType.entries
                 PSFilterType.NO_FILTER -> PSNoFilter()
                 PSFilterType.GAUSSIAN_BLUR -> PSGaussianBlurFilter()
                 PSFilterType.SHARPEN -> PSSharpenFilter()
+                PSFilterType.SATURATION -> PSSaturationFilter()
             }
         }
 
