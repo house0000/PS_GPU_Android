@@ -70,6 +70,7 @@ sealed class MainEvent {
             val colorSigma: Float? = null,
             val radius: Int? = null
         ): ApplyFilter(PSFilterType.BILATERAL)
+        data class LookUp(val intensity: Float): ApplyFilter(PSFilterType.LOOK_UP)
     }
 }
 

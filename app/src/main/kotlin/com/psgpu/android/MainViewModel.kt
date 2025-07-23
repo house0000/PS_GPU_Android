@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.createBitmap
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -14,6 +15,7 @@ import com.psgpu.android.filter.PSFilter
 import com.psgpu.android.filter.PSFilterException
 import com.psgpu.android.filter.PSFilterType
 import com.psgpu.android.filter.PSGaussianBlurFilter
+import com.psgpu.android.filter.PSLookUpFilter
 import com.psgpu.android.filter.PSNoFilter
 import com.psgpu.android.filter.PSSaturationFilter
 import com.psgpu.android.filter.PSSharpenFilter
@@ -51,7 +53,7 @@ class MainViewModel(
         BitmapFactory.decodeResource(applicationContext.resources, R.drawable.test_image)
     }
 
-    private val filters: Map<PSFilterType, PSFilter> = allFilters()
+    private val filters: Map<PSFilterType, PSFilter> = allFilters(applicationContext)
 
     private val _state = MutableStateFlow(MainState())
     val state: StateFlow<MainState>
@@ -171,6 +173,17 @@ class MainViewModel(
                             event.colorSigma,
                             event.radius
                         )
+                        try {
+                            filter.apply(defaultBitmap)
+                        } catch (e: PSFilterException) {
+                            Log.d("@@@", "ApplyFilter error: $e")
+                            Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
+                        }
+                    }
+
+                    is MainEvent.ApplyFilter.LookUp -> {
+                        val filter = filters[filterType] as PSLookUpFilter
+                        filter.setParams(event.intensity)
                         try {
                             filter.apply(defaultBitmap)
                         } catch (e: PSFilterException) {
@@ -386,6 +399,18 @@ class MainViewModel(
                                     }
                                 )
                             )
+
+                            PSFilterType.LOOK_UP -> listOf(
+                                FilterItemState.SliderState(
+                                    title = "intensity",
+                                    min = 0f,
+                                    max = 10f,
+                                    onSlide = { intensity ->
+                                        onEvent(MainEvent.ApplyFilter.LookUp(intensity))
+                                    }
+                                ),
+                            )
+
                             else -> emptyList()
                         }
                     )
@@ -395,7 +420,7 @@ class MainViewModel(
     }
 }
 
-private fun allFilters(): Map<PSFilterType, PSFilter> = PSFilterType.entries
+private fun allFilters(context: Context): Map<PSFilterType, PSFilter> = PSFilterType.entries
     .let { types ->
         val map = mutableMapOf<PSFilterType, PSFilter>()
 
@@ -409,6 +434,11 @@ private fun allFilters(): Map<PSFilterType, PSFilter> = PSFilterType.entries
                 PSFilterType.ZOOM_BLUR -> PSZoomBlurFilter()
                 PSFilterType.VIGNETTE -> PSVignetteFilter()
                 PSFilterType.BILATERAL -> PSBilateralFilter()
+                PSFilterType.LOOK_UP -> PSLookUpFilter(
+                    lutBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.lookup_from_qiita),
+                    lutGridSize = 8,
+                    lutTileSize = 64
+                )
             }
         }
 
