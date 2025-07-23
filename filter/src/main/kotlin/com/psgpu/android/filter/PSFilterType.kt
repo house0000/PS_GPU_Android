@@ -3,7 +3,8 @@ package com.psgpu.android.filter
 enum class PSFilterType {
     NO_FILTER,
     GAUSSIAN_BLUR,
-    SHARPEN;
+    SHARPEN,
+    SATURATION;
 
     val title: String
         get() {
@@ -11,6 +12,7 @@ enum class PSFilterType {
                 NO_FILTER -> "NO_FILTER"
                 GAUSSIAN_BLUR -> "GAUSSIAN_BLUR"
                 SHARPEN -> "SHARPEN"
+                SATURATION -> "SATURATION"
             }
         }
 }
