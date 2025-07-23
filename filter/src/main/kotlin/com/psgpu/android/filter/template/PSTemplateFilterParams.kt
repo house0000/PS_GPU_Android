@@ -1,6 +1,7 @@
 package com.psgpu.android.filter.template
 
 import android.graphics.Bitmap
+import android.opengl.GLES20
 import androidx.annotation.IntRange
 
 // デフォルトはオリジナルのBitmapを再描画するだけ
@@ -41,7 +42,11 @@ sealed class PSVertexAttributeParam {
 sealed class PSUniformParam {
     data class Texture2D(
         val nameOnShader: String,
-        val bitmap: Bitmap
+        val bitmap: Bitmap,
+        val minFilter: Int = GLES20.GL_LINEAR,
+        val magFilter: Int = GLES20.GL_LINEAR,
+        val wrapS: Int = GLES20.GL_CLAMP_TO_EDGE,
+        val wrapT: Int = GLES20.GL_CLAMP_TO_EDGE
     ): PSUniformParam()
 
     data class F1(

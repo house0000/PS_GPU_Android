@@ -150,31 +150,25 @@ open class PSTemplateFilter(
         // --------- グラフィックパイプラインの実行 ---------
 
         // Uniformを設定する
+        // テクスチャは生成だけして最後にまとめてバインドする。
+        val textureObjects = mutableListOf<Pair<Int, String>>() // (ハンドラ, 名前)
         // 入力テクスチャ
-        val uTextureLocation = GLES20.glGetUniformLocation(program, "u_Texture")
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, inputTexture.handler)
-        GLES20.glUniform1i(uTextureLocation, 0)
+        textureObjects.add(Pair(inputTexture.handler, "u_Texture"))
         // その他のカスタムUniform
         setupCustomUniformParams(width, height)
-        var textureUnitSlotIndex = 1
         params.uniformParams.forEach { param ->
             when (param) {
                 is PSUniformParam.Texture2D -> {
                     // Textureの生成
-                    val tex = GLES20CreateTextureObject(param.bitmap)
+                    val tex = GLES20CreateTextureObject(
+                        param.bitmap,
+                        param.minFilter,
+                        param.magFilter,
+                        param.wrapS,
+                        param.wrapT
+                    )
                     glObjects.addTexture(tex)
-
-                    // Uniformへの設定
-                    val slotIndex = textureUnitSlotIndex
-                    val slot = GLES20GetTextureUnitSlot(slotIndex)
-
-                    val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
-                    GLES20.glActiveTexture(slot)
-                    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tex)
-                    GLES20.glUniform1i(location, slotIndex)
-
-                    textureUnitSlotIndex++
+                    textureObjects.add(Pair(tex, param.nameOnShader))
                 }
 
                 is PSUniformParam.F1 -> {
@@ -203,6 +197,15 @@ open class PSTemplateFilter(
                 }
 
             }
+        }
+        // テクスチャのバインド
+        textureObjects.forEachIndexed { index, (tex, name) ->
+            val slotIndex = index
+            val slot = GLES20GetTextureUnitSlot(slotIndex)
+            val location = GLES20.glGetUniformLocation(program, name)
+            GLES20.glActiveTexture(slot)
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tex)
+            GLES20.glUniform1i(location, slotIndex)
         }
 
         // 出力FBOのバインド
@@ -278,9 +281,5 @@ open class PSTemplateFilter(
         releaseDrawContext()
 
         return outputBitmap
-    }
-
-    fun setMutableParams(params: List<PSUniformParam>) {
-        this.params.uniformParams = params
     }
 }

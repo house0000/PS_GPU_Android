@@ -8,7 +8,8 @@ enum class PSFilterType {
     CONTRAST,
     ZOOM_BLUR,
     VIGNETTE,
-    BILATERAL;
+    BILATERAL,
+    LOOK_UP;
 
     val title: String
         get() {
@@ -21,6 +22,7 @@ enum class PSFilterType {
                 ZOOM_BLUR -> "ZOOM_BLUR"
                 VIGNETTE -> "VIGNETTE"
                 BILATERAL -> "BILATERAL"
+                LOOK_UP -> "LOOK_UP"
             }
         }
 }
