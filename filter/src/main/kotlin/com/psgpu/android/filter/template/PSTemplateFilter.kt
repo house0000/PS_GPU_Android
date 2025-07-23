@@ -182,9 +182,19 @@ open class PSTemplateFilter(
                     GLES20.glUniform1f(location, param.value)
                 }
 
+                is PSUniformParam.F2 -> {
+                    val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
+                    GLES20.glUniform2f(location, param.valueX, param.valueY)
+                }
+
                 is PSUniformParam.I1 -> {
                     val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
                     GLES20.glUniform1i(location, param.value)
+                }
+
+                is PSUniformParam.I2 -> {
+                    val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
+                    GLES20.glUniform2i(location, param.valueX, param.valueY)
                 }
             }
         }

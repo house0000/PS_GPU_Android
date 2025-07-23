@@ -11,9 +11,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -46,6 +51,14 @@ sealed class MainEvent {
         data class Sharpen(val intensity: Float): ApplyFilter(PSFilterType.SHARPEN)
         data class Saturation(val saturation: Float): ApplyFilter(PSFilterType.SATURATION)
         data class Contrast(val contrast: Float): ApplyFilter(PSFilterType.CONTRAST)
+        data class ZoomBlur(
+            val intensity: Float? = null,
+            // (0.5f, 0.5f) means center.
+            val blurCenter: Pair<Float?, Float?>? = null,
+            // sampling count. (Quality - Calculation trade-off)
+            val samples: Int? = null,
+            val sigma: Float? = null
+        ): ApplyFilter(PSFilterType.ZOOM_BLUR)
     }
 }
 
@@ -88,6 +101,9 @@ private fun Screen(
 
         // フィルター一覧
         FilterList(state.filters, selectedFilter = state.selectedFilter, onEvent)
+
+        // ナビゲーションバーのスペース
+        Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
     }
 }
 

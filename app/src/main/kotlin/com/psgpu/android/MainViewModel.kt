@@ -15,6 +15,7 @@ import com.psgpu.android.filter.PSGaussianBlurFilter
 import com.psgpu.android.filter.PSNoFilter
 import com.psgpu.android.filter.PSSaturationFilter
 import com.psgpu.android.filter.PSSharpenFilter
+import com.psgpu.android.filter.PSZoomBlurFilter
 import com.psgpu.android.filter.template.PSTemplateFilter
 import com.psgpu.android.ui.filter.FilterItemState
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -120,6 +121,21 @@ class MainViewModel(
                             Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
                         }
                     }
+
+                    is MainEvent.ApplyFilter.ZoomBlur -> {
+                        val filter = filters[filterType] as PSZoomBlurFilter
+                        filter.setParams(
+                            event.intensity,
+                            event.blurCenter,
+                            event.samples
+                        )
+                        try {
+                            filter.apply(defaultBitmap)
+                        } catch (e: PSFilterException) {
+                            Log.d("@@@", "ApplyFilter error: $e")
+                            Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
+                        }
+                    }
                 }
 
                 _state.update {
@@ -207,6 +223,41 @@ class MainViewModel(
                                     }
                                 ),
                             )
+
+                            PSFilterType.ZOOM_BLUR -> listOf(
+                                FilterItemState.SliderState(
+                                    title = "intensity",
+                                    min = 0f,
+                                    max = 1f,
+                                    onSlide = { intensity ->
+                                        onEvent(MainEvent.ApplyFilter.ZoomBlur(intensity = intensity))
+                                    }
+                                ),
+                                FilterItemState.SliderState(
+                                    title = "centerX",
+                                    min = 0f,
+                                    max = 1f,
+                                    onSlide = { centerX ->
+                                        onEvent(MainEvent.ApplyFilter.ZoomBlur(blurCenter = Pair(centerX, null)))
+                                    }
+                                ),
+                                FilterItemState.SliderState(
+                                    title = "centerY",
+                                    min = 0f,
+                                    max = 1f,
+                                    onSlide = { centerY ->
+                                        onEvent(MainEvent.ApplyFilter.ZoomBlur(blurCenter = Pair(null, centerY)))
+                                    }
+                                ),
+                                FilterItemState.SliderState(
+                                    title = "samples",
+                                    min = 1f,
+                                    max = 30f,
+                                    onSlide = { samples ->
+                                        onEvent(MainEvent.ApplyFilter.ZoomBlur(samples = samples.toInt()))
+                                    }
+                                )
+                            )
                             else -> emptyList()
                         }
                     )
@@ -227,6 +278,7 @@ private fun allFilters(): Map<PSFilterType, PSFilter> = PSFilterType.entries
                 PSFilterType.SHARPEN -> PSSharpenFilter()
                 PSFilterType.SATURATION -> PSSaturationFilter()
                 PSFilterType.CONTRAST -> PSContrastFilter()
+                PSFilterType.ZOOM_BLUR -> PSZoomBlurFilter()
             }
         }
 
