@@ -41,10 +41,6 @@ private data class PSGaussianBlurHorizontalFilter(
     params = PSTemplateFilterParams(
         vertexShaderSrcPath = "shader/FillTexture.vsh",
         fragmentShaderSrcPath = "shader/GaussianBlurHorizontal.fsh",
-        uniformParams = listOf(
-            PSUniformParam.I1("u_kernel", radius),
-            PSUniformParam.F1("u_sigma", sigma)
-        )
     )
 ) {
     fun setParams(
@@ -53,17 +49,14 @@ private data class PSGaussianBlurHorizontalFilter(
     ) {
         this.radius = radius ?: this.radius
         this.sigma = sigma ?: this.sigma
-
-        params.uniformParams = listOf(
-            PSUniformParam.I1("u_kernel", this.radius),
-            PSUniformParam.F1("u_sigma", this.sigma)
-        )
     }
 
-    override fun runGraphicPipeline(inputTexture: PSTextureObject, width: Int, height: Int): PSFBO {
-        params.uniformParams = params.uniformParams + PSUniformParam.I1("u_TextureWidth", width)
-
-        return super.runGraphicPipeline(inputTexture, width, height)
+    override fun setupCustomUniformParams(width: Int, height: Int) {
+        params.uniformParams = listOf(
+            PSUniformParam.I1("u_kernel", this.radius),
+            PSUniformParam.F1("u_sigma", this.sigma),
+            PSUniformParam.I1("u_TextureWidth", width)
+        )
     }
 }
 
@@ -73,11 +66,7 @@ private data class PSGaussianBlurVerticalFilter(
 ): PSTemplateFilter(
     params = PSTemplateFilterParams(
         vertexShaderSrcPath = "shader/FillTexture.vsh",
-        fragmentShaderSrcPath = "shader/GaussianBlurVertical.fsh",
-        uniformParams = listOf(
-            PSUniformParam.I1("u_kernel", radius),
-            PSUniformParam.F1("u_sigma", sigma)
-        )
+        fragmentShaderSrcPath = "shader/GaussianBlurVertical.fsh"
     )
 ) {
     fun setParams(
@@ -86,16 +75,13 @@ private data class PSGaussianBlurVerticalFilter(
     ) {
         this.radius = radius ?: this.radius
         this.sigma = sigma ?: this.sigma
-
-        params.uniformParams = listOf(
-            PSUniformParam.I1("u_kernel", this.radius),
-            PSUniformParam.F1("u_sigma", this.sigma)
-        )
     }
 
-    override fun runGraphicPipeline(inputTexture: PSTextureObject, width: Int, height: Int): PSFBO {
-        params.uniformParams = params.uniformParams + PSUniformParam.I1("u_TextureHeight", height)
-
-        return super.runGraphicPipeline(inputTexture, width, height)
+    override fun setupCustomUniformParams(width: Int, height: Int) {
+        params.uniformParams = listOf(
+            PSUniformParam.I1("u_kernel", this.radius),
+            PSUniformParam.F1("u_sigma", this.sigma),
+            PSUniformParam.I1("u_TextureHeight", height)
+        )
     }
 }

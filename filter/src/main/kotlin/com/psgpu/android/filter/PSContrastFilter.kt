@@ -10,15 +10,14 @@ class PSContrastFilter(
     @FloatRange(from = 0.0) private var contrast: Float = 1f
 ): PSTemplateFilter(
     params = PSTemplateFilterParams(
-        fragmentShaderSrcPath = "shader/Contrast.fsh",
-        uniformParams = listOf(
-            PSUniformParam.F1("u_contrast", contrast)
-        )
+        fragmentShaderSrcPath = "shader/Contrast.fsh"
     )
 ) {
     fun setParams(@FloatRange(from = 0.0) contrast: Float) {
         this.contrast = contrast
+    }
 
+    override fun setupCustomUniformParams(width: Int, height: Int) {
         params.uniformParams = listOf(
             PSUniformParam.F1("u_contrast", contrast)
         )
