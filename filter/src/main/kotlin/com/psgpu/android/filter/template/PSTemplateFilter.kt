@@ -2,7 +2,6 @@ package com.psgpu.android.filter.template
 
 import android.graphics.Bitmap
 import android.opengl.GLES20
-import androidx.annotation.IntRange
 import com.psgpu.android.filter.PSFilter
 import com.psgpu.android.filter.PSFilterException
 import com.psgpu.android.gl.GLES20CreateEmptyTextureObject
@@ -157,6 +156,7 @@ open class PSTemplateFilter(
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, inputTexture.handler)
         GLES20.glUniform1i(uTextureLocation, 0)
         // その他のカスタムUniform
+        setupCustomUniformParams(width, height)
         var textureUnitSlotIndex = 1
         params.uniformParams.forEach { param ->
             when (param) {
@@ -217,6 +217,9 @@ open class PSTemplateFilter(
         // outputテクスチャがバインドしたFBOを渡す
         return PSFBO(fbo)
     }
+
+    // Set custom uniforms
+    protected open fun setupCustomUniformParams(width: Int, height: Int) {}
 
     override fun releaseGLObjects() {
         glObjects.release()
