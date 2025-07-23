@@ -65,6 +65,11 @@ sealed class MainEvent {
             val center: Pair<Float?, Float?>? = null,
             val colorRGB: Triple<Float?, Float?, Float?>? = null
         ): ApplyFilter(PSFilterType.VIGNETTE)
+        data class Bilateral(
+            val spatialSigma: Float? = null,
+            val colorSigma: Float? = null,
+            val radius: Int? = null
+        ): ApplyFilter(PSFilterType.BILATERAL)
     }
 }
 

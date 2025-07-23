@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.psgpu.android.filter.PSBilateralFilter
 import com.psgpu.android.filter.PSContrastFilter
 import com.psgpu.android.filter.PSFilter
 import com.psgpu.android.filter.PSFilterException
@@ -154,6 +155,21 @@ class MainViewModel(
                                 event.colorRGB?.second ?: currentColor.green(),
                                 event.colorRGB?.third ?: currentColor.blue()
                             )
+                        )
+                        try {
+                            filter.apply(defaultBitmap)
+                        } catch (e: PSFilterException) {
+                            Log.d("@@@", "ApplyFilter error: $e")
+                            Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
+                        }
+                    }
+
+                    is MainEvent.ApplyFilter.Bilateral -> {
+                        val filter = filters[filterType] as PSBilateralFilter
+                        filter.setParams(
+                            event.spatialSigma,
+                            event.colorSigma,
+                            event.radius
                         )
                         try {
                             filter.apply(defaultBitmap)
@@ -343,6 +359,33 @@ class MainViewModel(
                                     }
                                 )
                             )
+
+                            PSFilterType.BILATERAL -> listOf(
+                                FilterItemState.SliderState(
+                                    title = "spatialSigma",
+                                    min = -5f,
+                                    max = 30f,
+                                    onSlide = { sigma ->
+                                        onEvent(MainEvent.ApplyFilter.Bilateral(spatialSigma = sigma))
+                                    }
+                                ),
+                                FilterItemState.SliderState(
+                                    title = "colorSigma",
+                                    min = -5f,
+                                    max = 30f,
+                                    onSlide = { sigma ->
+                                        onEvent(MainEvent.ApplyFilter.Bilateral(colorSigma = sigma))
+                                    }
+                                ),
+                                FilterItemState.SliderState(
+                                    title = "radius",
+                                    min = 0f,
+                                    max = 10f,
+                                    onSlide = { radius ->
+                                        onEvent(MainEvent.ApplyFilter.Bilateral(radius = radius.toInt()))
+                                    }
+                                )
+                            )
                             else -> emptyList()
                         }
                     )
@@ -365,6 +408,7 @@ private fun allFilters(): Map<PSFilterType, PSFilter> = PSFilterType.entries
                 PSFilterType.CONTRAST -> PSContrastFilter()
                 PSFilterType.ZOOM_BLUR -> PSZoomBlurFilter()
                 PSFilterType.VIGNETTE -> PSVignetteFilter()
+                PSFilterType.BILATERAL -> PSBilateralFilter()
             }
         }
 

@@ -4,8 +4,6 @@ precision highp float;
 precision mediump float;
 #endif
 
-const float PI = 3.14159265359;
-
 // テクスチャ座標
 varying vec2 v_TexCoord;
 
@@ -22,7 +20,8 @@ uniform float u_sigma;
 uniform int u_TextureHeight;
 
 float gaussian(int distance) {
-    return inversesqrt(2.0 * PI * u_sigma * u_sigma) * exp(- float(distance * distance) / (2.0 * u_sigma * u_sigma));
+    // (後で加重平均を取るので正規化は不要)
+    return exp(- float(distance * distance) / (2.0 * u_sigma * u_sigma));
 }
 
 void main() {
