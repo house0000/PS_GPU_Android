@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.psgpu.android.filter.PSContrastFilter
 import com.psgpu.android.filter.PSFilter
 import com.psgpu.android.filter.PSFilterException
 import com.psgpu.android.filter.PSFilterType
@@ -108,6 +109,17 @@ class MainViewModel(
                             Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
                         }
                     }
+
+                    is MainEvent.ApplyFilter.Contrast -> {
+                        val filter = filters[filterType] as PSContrastFilter
+                        filter.setParams(event.contrast)
+                        try {
+                            filter.apply(defaultBitmap)
+                        } catch (e: PSFilterException) {
+                            Log.d("@@@", "ApplyFilter error: $e")
+                            Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
+                        }
+                    }
                 }
 
                 _state.update {
@@ -184,6 +196,17 @@ class MainViewModel(
                                     }
                                 ),
                             )
+
+                            PSFilterType.CONTRAST -> listOf(
+                                FilterItemState.SliderState(
+                                    title = "contrast",
+                                    min = 0f,
+                                    max = 3f,
+                                    onSlide = { contrast ->
+                                        onEvent(MainEvent.ApplyFilter.Contrast(contrast))
+                                    }
+                                ),
+                            )
                             else -> emptyList()
                         }
                     )
@@ -203,6 +226,7 @@ private fun allFilters(): Map<PSFilterType, PSFilter> = PSFilterType.entries
                 PSFilterType.GAUSSIAN_BLUR -> PSGaussianBlurFilter()
                 PSFilterType.SHARPEN -> PSSharpenFilter()
                 PSFilterType.SATURATION -> PSSaturationFilter()
+                PSFilterType.CONTRAST -> PSContrastFilter()
             }
         }
 

@@ -4,7 +4,8 @@ enum class PSFilterType {
     NO_FILTER,
     GAUSSIAN_BLUR,
     SHARPEN,
-    SATURATION;
+    SATURATION,
+    CONTRAST;
 
     val title: String
         get() {
@@ -13,6 +14,7 @@ enum class PSFilterType {
                 GAUSSIAN_BLUR -> "GAUSSIAN_BLUR"
                 SHARPEN -> "SHARPEN"
                 SATURATION -> "SATURATION"
+                CONTRAST -> "CONTRAST"
             }
         }
 }
