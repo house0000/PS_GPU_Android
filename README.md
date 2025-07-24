@@ -2,7 +2,7 @@
 
 ![Image](https://github.com/user-attachments/assets/42bafe6a-be0d-4b12-b48d-737e236873a3)
 
-## Install
+# Install
 
 ```kotlin :settings.gradle.kts
 // settings.gradle.kts
@@ -24,10 +24,11 @@ dependencies {
 }
 ```
 
-## How to use
+# How to use
 
-### Filter
+## Filter
 
+### use filter
 ```kotlin
 // Setup
 class MainApplication: Application() {
@@ -37,7 +38,6 @@ class MainApplication: Application() {
     }
 }
 ```
-
 
 ```kotlin
 // init
@@ -53,6 +53,45 @@ filter.setParams(radius = 10)
 val filteredBitmap = filter.apply(bitmap)
 
 ```
+
+### custom filter
+```kotlin
+/**
+ * My custom filter
+ *
+ * @param myParam
+ *
+ * */
+class PSCustomFilter(
+    private var myParam: Float = 1f
+): PSTemplateFilter(
+    params = PSTemplateFilterParams(
+        vertexShaderSrcPath = "shader/Custom.vsh",
+        fragmentShaderSrcPath = "shader/Custom.fsh"
+    )
+) {
+    fun setParams(myParam: Float) {
+        this.myParam = myParam
+    }
+
+    override fun setupCustomUniformParams(width: Int, height: Int) {
+        params.uniformParams = listOf(
+            PSUniformParam.F1("u_myParam", saturation)
+        )
+    }
+
+    fun getMyParam(): Float = myParam
+}
+```
+
+```
+assets/
+└── shader/
+    └── Custom.fsh
+    └── Custom.vsh
+```
+
+
 
 ## Samples
 Run this project.
