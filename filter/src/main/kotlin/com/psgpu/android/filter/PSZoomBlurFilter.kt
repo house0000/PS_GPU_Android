@@ -4,11 +4,19 @@ import com.psgpu.android.filter.template.PSTemplateFilter
 import com.psgpu.android.filter.template.PSTemplateFilterParams
 import com.psgpu.android.filter.template.PSUniformParam
 
+/**
+ * ズームブラー効果を適用するフィルターです。
+ *
+ * 指定された中心点から放射状に画像をぼかし、カメラのズーム中に発生するような
+ * モーションブラーを表現します。
+ *
+ * @param intensity ブラーの強度。値が大きいほど、放射状に伸びるブラーが長くなります。
+ * @param blurCenter ブラーの中心点。画像の正規化座標で指定します（(0.0, 0.0)が左下、(1.0, 1.0)が右上）。デフォルトの `(0.5f, 0.5f)` は画像の中心を意味します。
+ * @param samples ブラー計算時のサンプリング回数。値を大きくするとブラーの品質は向上しますが、その分、計算負荷が高くなります。
+ */
 class PSZoomBlurFilter(
     private var intensity: Float = 0.1f,
-    // (0.5f, 0.5f) means center.
     private var blurCenter: Pair<Float, Float> = Pair(0.5f, 0.5f),
-    // sampling count. (Quality - Calculation trade-off)
     private var samples: Int = 5
 ): PSTemplateFilter(
     params = PSTemplateFilterParams(

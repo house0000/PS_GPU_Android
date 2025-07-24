@@ -240,7 +240,7 @@ class MainViewModel(
                                 ),
                                 FilterItemState.SliderState(
                                     title = "sigma",
-                                    min = 0.5f,
+                                    min = 0.01f,
                                     max = 100f,
                                     onSlide = { sigma ->
                                         onEvent(MainEvent.ApplyFilter.GaussianBlur(sigma = sigma))
@@ -376,7 +376,7 @@ class MainViewModel(
                             PSFilterType.BILATERAL -> listOf(
                                 FilterItemState.SliderState(
                                     title = "spatialSigma",
-                                    min = -5f,
+                                    min = 0.01f,
                                     max = 30f,
                                     onSlide = { sigma ->
                                         onEvent(MainEvent.ApplyFilter.Bilateral(spatialSigma = sigma))
@@ -384,7 +384,7 @@ class MainViewModel(
                                 ),
                                 FilterItemState.SliderState(
                                     title = "colorSigma",
-                                    min = -5f,
+                                    min = 0.01f,
                                     max = 30f,
                                     onSlide = { sigma ->
                                         onEvent(MainEvent.ApplyFilter.Bilateral(colorSigma = sigma))

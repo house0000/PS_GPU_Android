@@ -1,5 +1,6 @@
 package com.psgpu.android.filter
 
+/** 使えるフィルター一覧 */
 enum class PSFilterType {
     NO_FILTER,
     GAUSSIAN_BLUR,

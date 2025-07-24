@@ -7,15 +7,18 @@ import com.psgpu.android.filter.template.PSTemplateFilter
 import com.psgpu.android.filter.template.PSTemplateFilterParams
 import com.psgpu.android.filter.template.PSUniformParam
 
-/** Vignette Effect Filter. */
+/**
+ * Vignette Effect Filter.
+ *
+ * @param vignetteStart ビネットが始まる中心からの距離 (例: 0.3)
+ * @param vignetteEnd ビネットが完全に黒になる距離 (例: 0.75)
+ * @param center 中心
+ * @param vignetteColor ビネットの色 (alpha is not considered)
+ * */
 class PSVignetteFilter(
-    // ビネットが始まる中心からの距離 (例: 0.3)
     @FloatRange(from = 0.0) private var vignetteStart: Float = 0.75f,
-    // ビネットが完全に黒になる距離 (例: 0.75)
     @FloatRange(from = 0.0) private var vignetteEnd: Float = 1f,
-    // 中心
     private var center: Pair<Float, Float> = Pair(0.5f, 0.5f),
-    // ビネットの色 (alpha is not considered)
     @ColorInt private var vignetteColor: Int = Color.BLACK
 ): PSTemplateFilter(
     params = PSTemplateFilterParams(

@@ -16,8 +16,11 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 
-/** Just re-generate original bitmap.
+/**
+ * Just re-generate original bitmap.
  * This filter can be used as base filter implementation.
+ *
+ * [PSTemplateFilter] があるのでもう要らないかも。
  */
 open class PSNoFilter: PSFilter {
     // シェーダーソース

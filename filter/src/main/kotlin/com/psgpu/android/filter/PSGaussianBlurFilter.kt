@@ -1,16 +1,22 @@
 package com.psgpu.android.filter
 
 import android.graphics.Bitmap
+import androidx.annotation.FloatRange
 import com.psgpu.android.filter.template.PSTemplateFilter
 import com.psgpu.android.filter.template.PSTemplateFilterParams
 import com.psgpu.android.filter.template.PSUniformParam
-import com.psgpu.android.gl.model.PSFBO
 import com.psgpu.android.gl.model.PSTextureObject
 
-/** Gaussian Blur Filter */
+/**
+ * Gaussian Blur Filter
+ *
+ * @param radius 計算半径。でかいと滑らかになるが計算量が増える。
+ * @param sigma ガウス関数の係数。でかいと周りのピクセルの影響がデカくなる、のでよりのっぺりする。
+ *
+ * */
 data class PSGaussianBlurFilter(
     private var radius: Int = 10,
-    private var sigma: Float = 10f
+    @FloatRange(from = 0.01) private var sigma: Float = 10f
 ): PSFilter {
     private val horizontalBlurFilter = PSGaussianBlurHorizontalFilter(radius, sigma)
     private val verticalBlurFilter = PSGaussianBlurVerticalFilter(radius, sigma)
@@ -36,10 +42,9 @@ data class PSGaussianBlurFilter(
 
 private data class PSGaussianBlurHorizontalFilter(
     private var radius: Int,
-    private var sigma: Float
+    @FloatRange(from = 0.01) private var sigma: Float
 ): PSTemplateFilter(
     params = PSTemplateFilterParams(
-        vertexShaderSrcPath = "shader/FillTexture.vsh",
         fragmentShaderSrcPath = "shader/GaussianBlurHorizontal.fsh",
     )
 ) {
@@ -62,10 +67,9 @@ private data class PSGaussianBlurHorizontalFilter(
 
 private data class PSGaussianBlurVerticalFilter(
     private var radius: Int,
-    private var sigma: Float
+    @FloatRange(from = 0.01) private var sigma: Float
 ): PSTemplateFilter(
     params = PSTemplateFilterParams(
-        vertexShaderSrcPath = "shader/FillTexture.vsh",
         fragmentShaderSrcPath = "shader/GaussianBlurVertical.fsh"
     )
 ) {

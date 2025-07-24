@@ -1,11 +1,15 @@
 package com.psgpu.android.filter
 
 import android.graphics.Bitmap
+import com.psgpu.android.filter.PSFilter.Companion.eglContextExist
 import com.psgpu.android.gl.GLES20GetTextureAttachedToFBO
 import com.psgpu.android.gl.model.PSFBO
 import com.psgpu.android.gl.model.PSGLObjects
 import com.psgpu.android.gl.model.PSTextureObject
 
+/**
+ * 複数のフィルターをまとめてかけられるフィルター
+ * */
 class PSGroupFilter(
     val filters: List<PSFilter>
 ): PSFilter {
@@ -13,7 +17,7 @@ class PSGroupFilter(
 
     constructor(vararg filterArgs: PSFilter) : this(filterArgs.toList())
     override fun releaseGLObjects() {
-        // 多分大丈夫なんだけど一応逆から削除していく
+        // 一応逆から削除していく
         filters.reversed().forEach { it.releaseGLObjects() }
         glObjects.release()
     }

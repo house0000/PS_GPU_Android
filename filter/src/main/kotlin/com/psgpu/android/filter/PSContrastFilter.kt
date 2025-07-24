@@ -5,7 +5,11 @@ import com.psgpu.android.filter.template.PSTemplateFilter
 import com.psgpu.android.filter.template.PSTemplateFilterParams
 import com.psgpu.android.filter.template.PSUniformParam
 
-/** 明度差を調整するフィルター */
+/**
+ * 明度差を調整するフィルター
+ *
+ * @param contrast 0だとグレー一色、1がオリジナル、それ以上は明度差が強化される。
+ * */
 class PSContrastFilter(
     @FloatRange(from = 0.0) private var contrast: Float = 1f
 ): PSTemplateFilter(

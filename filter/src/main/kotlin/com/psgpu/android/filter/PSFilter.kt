@@ -11,7 +11,9 @@ import com.psgpu.android.gl.model.PSFBO
 import com.psgpu.android.gl.model.PSTextureObject
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import androidx.core.graphics.createBitmap
 
+/** フィルターのインターフェース */
 interface PSFilter {
     companion object {
         fun init(applicationContext: Context) {
@@ -30,8 +32,6 @@ interface PSFilter {
             get() {
                 return eglContext != null
             }
-
-        const val defaultVertexShaderSrcPath: String = "shader/FillTexture.vsh"
     }
 
     // region Rendering Flow
@@ -86,8 +86,7 @@ interface PSFilter {
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0)
 
         // Bitmapに変換
-        val outputBitmap =
-            Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val outputBitmap = createBitmap(width, height)
         outputBitmap.copyPixelsFromBuffer(byteBuffer)
 
         return outputBitmap

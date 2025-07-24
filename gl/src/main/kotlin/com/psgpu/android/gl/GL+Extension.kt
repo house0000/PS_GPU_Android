@@ -12,7 +12,7 @@ import java.nio.ByteBuffer
 
 /**
  * gl環境のセットアップ。
- * やってること: 有効なコンテキストがないとOpenGLシステムが反応してくれないので、使わないけど適当なEGLオフスクリーンレンダリング環境を立ち上げておく。
+ * やってること: 有効なコンテキストがないとOpenGLシステムが反応してくれないので、使わないけど適当なEGLオフスクリーンレンダリング環境を立ち上げておき、有効なContextを作成する。
  */
 @Throws(PSGLException::class)
 fun EGL14SetupContext(): PSEGLContextObjects {
@@ -75,7 +75,7 @@ fun EGL14SetupContext(): PSEGLContextObjects {
     return objects
 }
 
-/** Creates a compiled shader object and returns a handle. */
+/** コンパイル済みのシェーダオブジェクトを作成し、ハンドルを返す。 */
 @Throws(PSGLException::class)
 fun GLES20LoadShader(type: Int, shaderSrc: String): Int {
     val shader = GLES20.glCreateShader(type)
@@ -97,6 +97,7 @@ fun GLES20LoadShader(type: Int, shaderSrc: String): Int {
     return shader
 }
 
+/** リンク済みのプログラムオブジェクトを作成し、そのハンドルを返す */
 @Throws(PSGLException::class)
 fun GLES20CreateLinkedProgram(
     vertexShaderSrc: String,
@@ -131,6 +132,7 @@ fun GLES20CreateLinkedProgram(
     }
 }
 
+/** ビットマップからテクスチャオブジェクトを作成し、そのハンドルを返す。 */
 @Throws(PSGLException::class)
 fun GLES20CreateTextureObject(
     bitmap: Bitmap,
@@ -185,6 +187,7 @@ fun GLES20CreateTextureObject(
     return textureId
 }
 
+/** 空のテクスチャオブジェクトを生成し、ハンドルを返す */
 fun GLES20CreateEmptyTextureObject(
     width: Int,
     height: Int,
@@ -229,6 +232,7 @@ fun GLES20CreateEmptyTextureObject(
     return textureId
 }
 
+/** FBOを生成し、指定したテクスチャをカラーアタッチメントにバインドしてから、ハンドルを返す。 */
 fun GLES20CreateFBOColorAttachedTexture2D(textureObject: Int): Int {
     // 生成
     val fbos = IntArray(1)
@@ -247,6 +251,7 @@ fun GLES20CreateFBOColorAttachedTexture2D(textureObject: Int): Int {
     return fbo
 }
 
+/** 頂点属性からVBOを作成し、ハンドルを返す。 */
 fun GLES20CreateVBO(
     data: Buffer,
     byteSize: Int
@@ -273,6 +278,7 @@ fun GLES20CreateVBO(
     return vbo
 }
 
+/** index配列からIBOを作成しハンドルを返す。 */
 fun GLES20CreateIBO(
     data: Buffer,
     byteSize: Int
@@ -332,6 +338,7 @@ fun GLES20GetTextureAttachedToFBO(fbo: Int): Int {
     return params[0]
 }
 
+/** Intをテクスチャユニットに変換する便利関数 */
 fun GLES20GetTextureUnitSlot(@IntRange(from = 0, to = 31) index: Int): Int {
     return when (index) {
         0 -> GLES20.GL_TEXTURE0

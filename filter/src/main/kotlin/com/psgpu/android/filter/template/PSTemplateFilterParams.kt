@@ -7,7 +7,7 @@ import androidx.annotation.IntRange
 // デフォルトはオリジナルのBitmapを再描画するだけ
 data class PSTemplateFilterParams(
     /**
-     * If custom this, must has
+     * If custom this, .vsh must has
      *
      * // 頂点座標
      * attribute vec4 a_Position;
@@ -20,7 +20,7 @@ data class PSTemplateFilterParams(
     // If custom this, must has a_Position, a_TexCoord and don't bind data with them by yourself (bind internal).
     val vertexShaderSrcPath: String = "shader/FillTexture.vsh",
     /**
-     * Must has
+     * If custom this, .fsh must has
      *
      * // テクスチャユニット
      * uniform sampler2D u_Texture;

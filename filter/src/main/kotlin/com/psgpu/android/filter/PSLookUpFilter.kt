@@ -8,15 +8,18 @@ import com.psgpu.android.filter.template.PSTemplateFilter
 import com.psgpu.android.filter.template.PSTemplateFilterParams
 import com.psgpu.android.filter.template.PSUniformParam
 
-/** Look up filter. */
+/**
+ * Look up filter.
+ *
+ * @param intensity 強度 0はオリジナル
+ * @param lutBitmap Look Up Table (LUT)
+ * @param lutGridSize　LUTの一辺にタイルいくつあるか
+ * @param lutTileSize LUTのタイルの一辺にpixelがいくつあるか
+ * */
 class PSLookUpFilter(
-    // Intensity
     @FloatRange(from = 0.0) private var intensity: Float = 0.1f,
-    // Look Up Table (LUT)
     private var lutBitmap: Bitmap,
-    // tiles per bitmap one line.
     @IntRange(from = 1) private var lutGridSize: Int,
-    // pixels per tile one line.
     @IntRange(from = 1) private var lutTileSize: Int
 ): PSTemplateFilter(
     params = PSTemplateFilterParams(

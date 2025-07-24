@@ -4,8 +4,9 @@ import android.content.Context
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-fun readShaderFile(context: Context, shaderSrcPath: String): String {
-    val inputStream = context.assets.open(shaderSrcPath)
+/** assets内のシェーダファイルへのパスを指定すると、その内容のStringを返す。 */
+fun readShaderFile(context: Context, shaderSrcAssetsPath: String): String {
+    val inputStream = context.assets.open(shaderSrcAssetsPath)
     val reader = BufferedReader(InputStreamReader(inputStream))
     return reader.readText()
 }

@@ -8,9 +8,14 @@ import android.opengl.EGLSurface
 import android.opengl.GLES20
 import java.nio.IntBuffer
 
+/**
+ * GL関連のインスタンスは手動でリリースしないといけないので、リリースを担ってくれるオブジェクトを作っておく。
+ */
 interface PSGLObject {
     fun release()
 }
+
+/** GL関連のインスタンスをまとめて格納しておけて、まとめてリリース処理できる箱 */
 data class PSGLObjects(
     var program: PSGLProgramObjects? = null,
     val textureObjects: MutableList<PSTextureObject> = mutableListOf(),
@@ -49,7 +54,7 @@ data class PSGLObjects(
 
 }
 
-// プログラム周りのオブジェクトのコンテナ
+/** プログラム用のリリースコンテナ */
 data class PSGLProgramObjects(
     var vertexShader: Int? = null,
     var fragmentShader: Int? = null,
@@ -68,6 +73,7 @@ data class PSGLProgramObjects(
     }
 }
 
+/** VBO用のリリースコンテナ */
 data class PSVBO(
     val handler: Int
 ): PSGLObject {
@@ -76,6 +82,7 @@ data class PSVBO(
     }
 }
 
+/** IBO用のリリースコンテナ */
 data class PSIBO(
     val handler: Int
 ): PSGLObject {
@@ -84,6 +91,7 @@ data class PSIBO(
     }
 }
 
+/** FBO用のリリースコンテナ */
 data class PSFBO(
     val handler: Int
 ): PSGLObject {
@@ -92,6 +100,7 @@ data class PSFBO(
     }
 }
 
+/** テクスチャ用のリリースコンテナ */
 data class PSTextureObject(
     val handler: Int
 ): PSGLObject {
@@ -100,7 +109,7 @@ data class PSTextureObject(
     }
 }
 
-// EGL初期化オブジェクトのコンテナ
+/** EGL初期化オブジェクト用のリリースコンテナ */
 data class PSEGLContextObjects(
     var display: EGLDisplay? = null,
     var config: EGLConfig? = null,

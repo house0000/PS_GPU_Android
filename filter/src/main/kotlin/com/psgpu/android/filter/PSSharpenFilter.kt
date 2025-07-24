@@ -3,9 +3,13 @@ package com.psgpu.android.filter
 import com.psgpu.android.filter.template.PSTemplateFilter
 import com.psgpu.android.filter.template.PSTemplateFilterParams
 import com.psgpu.android.filter.template.PSUniformParam
-import com.psgpu.android.gl.model.PSFBO
-import com.psgpu.android.gl.model.PSTextureObject
 
+/**
+ * エッジを強化するフィルター
+ *
+ * @param intensity 0はオリジナル
+ *
+ * */
 class PSSharpenFilter(
     private var intensity: Float = 0f
 ): PSTemplateFilter(

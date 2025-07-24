@@ -11,6 +11,7 @@ import com.psgpu.android.gl.GLES20CreateLinkedProgram
 import com.psgpu.android.gl.GLES20CreateTextureObject
 import com.psgpu.android.gl.GLES20CreateVBO
 import com.psgpu.android.gl.GLES20GetTextureUnitSlot
+import com.psgpu.android.gl.PSGLException
 import com.psgpu.android.gl.model.PSFBO
 import com.psgpu.android.gl.model.PSGLObjects
 import com.psgpu.android.gl.model.PSTextureObject
@@ -21,14 +22,17 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 
-// シェーダとシェーダ内の変数だけ渡せばレンダリングしてくれるフィルター
-// デフォルトはPSNoFilterと同じ挙動
+/**
+ * シェーダとシェーダ内の変数だけ渡せばレンダリングしてくれるフィルター。
+ * This filter can be used as base filter implementation.
+ * デフォルトの挙動はPSNoFilterと同じく、渡されたBitmapを再生成するだけ。
+ */
 open class PSTemplateFilter(
     protected val params: PSTemplateFilterParams = PSTemplateFilterParams()
 ): PSFilter {
     // シェーダーソース
-    private val vertexShaderSrc = readShaderFile(PSFilter.getContext(), params.vertexShaderSrcPath)
-    private val fragmentShaderSrc = readShaderFile(PSFilter.getContext(), params.fragmentShaderSrcPath)
+    private val vertexShaderSrc: String = readShaderFile(PSFilter.getContext(), params.vertexShaderSrcPath)
+    private val fragmentShaderSrc: String = readShaderFile(PSFilter.getContext(), params.fragmentShaderSrcPath)
 
 
     // 頂点属性
@@ -73,6 +77,7 @@ open class PSTemplateFilter(
 
 
     init {
+        // 頂点属性の初期化
         params.vertexAttributeParams.forEach { param ->
             when (param) {
                 is PSVertexAttributeParam.FloatVector -> {
@@ -92,149 +97,165 @@ open class PSTemplateFilter(
         width: Int,
         height: Int
     ): PSFBO {
-        // --------- 出力の準備 ---------
+        try {
+            // --------- 出力の準備 ---------
 
-        // 出力テクスチャを生成
-        val outputTexture =
-            GLES20CreateEmptyTextureObject(width, height)
-        glObjects.addTexture(outputTexture)
+            // 出力テクスチャを生成
+            val outputTexture =
+                GLES20CreateEmptyTextureObject(width, height)
+            glObjects.addTexture(outputTexture)
 
-        // 出力テクスチャのFBOを作っておく
-        val fbo = GLES20CreateFBOColorAttachedTexture2D(outputTexture)
-        glObjects.addFBO(fbo)
+            // 出力テクスチャのFBOを作っておく
+            val fbo = GLES20CreateFBOColorAttachedTexture2D(outputTexture)
+            glObjects.addFBO(fbo)
 
-        // --------- グラフィックパイプラインの準備 ---------
+            // --------- グラフィックパイプラインの準備 ---------
 
-        // シェーダプログラムの作成
-        glObjects.addProgram(GLES20CreateLinkedProgram(vertexShaderSrc, fragmentShaderSrc))
-        val program = glObjects.program!!.program!!
-        GLES20.glUseProgram(program)
+            // シェーダプログラムの作成
+            glObjects.addProgram(GLES20CreateLinkedProgram(vertexShaderSrc, fragmentShaderSrc))
+            val program = glObjects.program!!.program!!
+            GLES20.glUseProgram(program)
 
-        // シェーダに頂点属性を渡す(VBO)
-        // 頂点座標
-        val vertexCoordsVBO =
-            GLES20CreateVBO(vertexCoordsBuffer, Float.SIZE_BYTES * vertexCoords.size)
-        glObjects.addVBO(vertexCoordsVBO)
-        val positionLocation = GLES20.glGetAttribLocation(program, "a_Position")
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexCoordsVBO)
-        GLES20.glEnableVertexAttribArray(positionLocation)
-        GLES20.glVertexAttribPointer(positionLocation, 2, GLES20.GL_FLOAT, false, 0, 0)
-        // 入力テクスチャ座標
-        val textureCoordsVBO =
-            GLES20CreateVBO(textureCoordsBuffer, Float.SIZE_BYTES * textureCoords.size)
-        glObjects.addVBO(textureCoordsVBO)
-        val texCoordLocation = GLES20.glGetAttribLocation(program, "a_TexCoord")
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, textureCoordsVBO)
-        GLES20.glEnableVertexAttribArray(texCoordLocation)
-        GLES20.glVertexAttribPointer(texCoordLocation, 2, GLES20.GL_FLOAT, false, 0, 0)
-        // カスタム頂点属性
-        params.vertexAttributeParams.forEachIndexed { index, param ->
-            when (param) {
-                is PSVertexAttributeParam.FloatVector -> {
-                    val vbo =
-                        GLES20CreateVBO(additionalVertexAttributeBuffers[index], Float.SIZE_BYTES * param.data.size)
-                    glObjects.addVBO(vbo)
-                    val location = GLES20.glGetAttribLocation(program, param.nameOnShader)
-                    GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo)
-                    GLES20.glEnableVertexAttribArray(location)
-                    GLES20.glVertexAttribPointer(location, param.vecSize, GLES20.GL_FLOAT, false, 0, 0)
+            // シェーダに頂点属性を渡す(VBO)
+            // 頂点座標
+            val vertexCoordsVBO =
+                GLES20CreateVBO(vertexCoordsBuffer, Float.SIZE_BYTES * vertexCoords.size)
+            glObjects.addVBO(vertexCoordsVBO)
+            val positionLocation = GLES20.glGetAttribLocation(program, "a_Position")
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexCoordsVBO)
+            GLES20.glEnableVertexAttribArray(positionLocation)
+            GLES20.glVertexAttribPointer(positionLocation, 2, GLES20.GL_FLOAT, false, 0, 0)
+            // 入力テクスチャ座標
+            val textureCoordsVBO =
+                GLES20CreateVBO(textureCoordsBuffer, Float.SIZE_BYTES * textureCoords.size)
+            glObjects.addVBO(textureCoordsVBO)
+            val texCoordLocation = GLES20.glGetAttribLocation(program, "a_TexCoord")
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, textureCoordsVBO)
+            GLES20.glEnableVertexAttribArray(texCoordLocation)
+            GLES20.glVertexAttribPointer(texCoordLocation, 2, GLES20.GL_FLOAT, false, 0, 0)
+            // カスタム頂点属性
+            params.vertexAttributeParams.forEachIndexed { index, param ->
+                when (param) {
+                    is PSVertexAttributeParam.FloatVector -> {
+                        val vbo =
+                            GLES20CreateVBO(
+                                additionalVertexAttributeBuffers[index],
+                                Float.SIZE_BYTES * param.data.size
+                            )
+                        glObjects.addVBO(vbo)
+                        val location = GLES20.glGetAttribLocation(program, param.nameOnShader)
+                        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo)
+                        GLES20.glEnableVertexAttribArray(location)
+                        GLES20.glVertexAttribPointer(
+                            location,
+                            param.vecSize,
+                            GLES20.GL_FLOAT,
+                            false,
+                            0,
+                            0
+                        )
+                    }
                 }
             }
-        }
 
-        // 頂点のindexを渡す(IBO)
-        val ibo = GLES20CreateIBO(indexBuffer, Short.SIZE_BYTES * index.size)
-        glObjects.addIBO(ibo)
-        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo)
+            // 頂点のindexを渡す(IBO)
+            val ibo = GLES20CreateIBO(indexBuffer, Short.SIZE_BYTES * index.size)
+            glObjects.addIBO(ibo)
+            GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo)
 
-        // --------- グラフィックパイプラインの実行 ---------
+            // --------- グラフィックパイプラインの実行 ---------
 
-        // Uniformを設定する
-        // テクスチャは生成だけして最後にまとめてバインドする。
-        val textureObjects = mutableListOf<Pair<Int, String>>() // (ハンドラ, 名前)
-        // 入力テクスチャ
-        textureObjects.add(Pair(inputTexture.handler, "u_Texture"))
-        // その他のカスタムUniform
-        setupCustomUniformParams(width, height)
-        params.uniformParams.forEach { param ->
-            when (param) {
-                is PSUniformParam.Texture2D -> {
-                    // Textureの生成
-                    val tex = GLES20CreateTextureObject(
-                        param.bitmap,
-                        param.minFilter,
-                        param.magFilter,
-                        param.wrapS,
-                        param.wrapT
-                    )
-                    glObjects.addTexture(tex)
-                    textureObjects.add(Pair(tex, param.nameOnShader))
+            // Uniformを設定する
+            // テクスチャは生成だけして最後にまとめてバインドする。
+            val textureObjects = mutableListOf<Pair<Int, String>>() // (ハンドラ, 名前)
+            // 入力テクスチャ
+            textureObjects.add(Pair(inputTexture.handler, "u_Texture"))
+            // その他のカスタムUniform
+            setupCustomUniformParams(width, height)
+            params.uniformParams.forEach { param ->
+                when (param) {
+                    is PSUniformParam.Texture2D -> {
+                        // Textureの生成
+                        val tex = GLES20CreateTextureObject(
+                            param.bitmap,
+                            param.minFilter,
+                            param.magFilter,
+                            param.wrapS,
+                            param.wrapT
+                        )
+                        glObjects.addTexture(tex)
+                        textureObjects.add(Pair(tex, param.nameOnShader))
+                    }
+
+                    is PSUniformParam.F1 -> {
+                        val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
+                        GLES20.glUniform1f(location, param.value)
+                    }
+
+                    is PSUniformParam.F2 -> {
+                        val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
+                        GLES20.glUniform2f(location, param.valueX, param.valueY)
+                    }
+
+                    is PSUniformParam.F3 -> {
+                        val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
+                        GLES20.glUniform3f(location, param.x, param.y, param.z)
+                    }
+
+                    is PSUniformParam.I1 -> {
+                        val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
+                        GLES20.glUniform1i(location, param.value)
+                    }
+
+                    is PSUniformParam.I2 -> {
+                        val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
+                        GLES20.glUniform2i(location, param.valueX, param.valueY)
+                    }
+
                 }
-
-                is PSUniformParam.F1 -> {
-                    val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
-                    GLES20.glUniform1f(location, param.value)
-                }
-
-                is PSUniformParam.F2 -> {
-                    val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
-                    GLES20.glUniform2f(location, param.valueX, param.valueY)
-                }
-
-                is PSUniformParam.F3 -> {
-                    val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
-                    GLES20.glUniform3f(location, param.x, param.y, param.z)
-                }
-
-                is PSUniformParam.I1 -> {
-                    val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
-                    GLES20.glUniform1i(location, param.value)
-                }
-
-                is PSUniformParam.I2 -> {
-                    val location = GLES20.glGetUniformLocation(program, param.nameOnShader)
-                    GLES20.glUniform2i(location, param.valueX, param.valueY)
-                }
-
             }
+            // テクスチャのバインド
+            textureObjects.forEachIndexed { index, (tex, name) ->
+                val slotIndex = index
+                val slot = GLES20GetTextureUnitSlot(slotIndex)
+                val location = GLES20.glGetUniformLocation(program, name)
+                GLES20.glActiveTexture(slot)
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tex)
+                GLES20.glUniform1i(location, slotIndex)
+            }
+
+            // 出力FBOのバインド
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fbo)
+
+            // バインドしたFBOは完全な状態か？
+            val boundFBOStatus = GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER)
+            if (boundFBOStatus != GLES20.GL_FRAMEBUFFER_COMPLETE) {
+                throw PSFilterException.InvalidFBOStatus
+            }
+
+            // キャンバス(FBO)の初期化
+            GLES20.glViewport(0, 0, width, height)
+            GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f) // 背景を不透明な黒に
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+
+            // ドロー
+            GLES20.glDrawElements(
+                GLES20.GL_TRIANGLES,
+                index.size,
+                GLES20.GL_UNSIGNED_SHORT,
+                0
+            )
+
+            // fboのアンバインド
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0)
+
+            // 出力テクスチャがカラーアタッチメントにバインドしたFBOを渡す
+            return PSFBO(fbo)
+        } catch (e: PSFilterException) {
+            throw e
+        } catch (e: PSGLException) {
+            throw PSFilterException.GL(e)
         }
-        // テクスチャのバインド
-        textureObjects.forEachIndexed { index, (tex, name) ->
-            val slotIndex = index
-            val slot = GLES20GetTextureUnitSlot(slotIndex)
-            val location = GLES20.glGetUniformLocation(program, name)
-            GLES20.glActiveTexture(slot)
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tex)
-            GLES20.glUniform1i(location, slotIndex)
-        }
-
-        // 出力FBOのバインド
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fbo)
-
-        // バインドしたFBOは完全な状態か？
-        val boundFBOStatus = GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER)
-        if (boundFBOStatus != GLES20.GL_FRAMEBUFFER_COMPLETE) {
-            throw PSFilterException.InvalidFBOStatus
-        }
-
-        // キャンバス(FBO)の初期化
-        GLES20.glViewport(0, 0, width, height)
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f) // 背景を不透明な黒に
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
-
-        // Draw
-        GLES20.glDrawElements(
-            GLES20.GL_TRIANGLES,
-            index.size,
-            GLES20.GL_UNSIGNED_SHORT,
-            0
-        )
-
-        // fboのアンバインド
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0)
-
-        // outputテクスチャがバインドしたFBOを渡す
-        return PSFBO(fbo)
     }
 
     // Set custom uniforms
