@@ -4,8 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
-import androidx.compose.ui.graphics.Color
-import androidx.core.graphics.createBitmap
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -21,7 +19,6 @@ import com.psgpu.android.filter.PSSaturationFilter
 import com.psgpu.android.filter.PSSharpenFilter
 import com.psgpu.android.filter.PSVignetteFilter
 import com.psgpu.android.filter.PSZoomBlurFilter
-import com.psgpu.android.filter.template.PSTemplateFilter
 import com.psgpu.android.ui.filter.FilterItemState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,20 +27,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlin.math.max
 
 sealed class MainMessage {
 
 }
 
-class MainViewModel(
+class SamplesViewModel(
     private val applicationContext: Context
 ): ViewModel(), DefaultLifecycleObserver {
     class Factory(private val applicationContext: Context) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+            if (modelClass.isAssignableFrom(SamplesViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return MainViewModel(applicationContext) as T
+                return SamplesViewModel(applicationContext) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }
@@ -55,8 +51,8 @@ class MainViewModel(
 
     private val filters: Map<PSFilterType, PSFilter> = allFilters(applicationContext)
 
-    private val _state = MutableStateFlow(MainState())
-    val state: StateFlow<MainState>
+    private val _state = MutableStateFlow(SamplesState())
+    val state: StateFlow<SamplesState>
         get() = _state.asStateFlow()
 
     private val _message = MutableSharedFlow<MainMessage>()
@@ -67,14 +63,14 @@ class MainViewModel(
         setup()
     }
 
-    fun onEvent(event: MainEvent) {
+    fun onEvent(event: SamplesEvent) {
         when (event) {
-            is MainEvent.ApplyFilter -> {
+            is SamplesEvent.ApplyFilter -> {
                 // 選択されたフィルターを適用する
                 val filterType = event.filterType
 
                 val filteredBitmap =  when (event) {
-                    is MainEvent.ApplyFilter.GaussianBlur -> {
+                    is SamplesEvent.ApplyFilter.GaussianBlur -> {
                         val filter = filters[filterType] as PSGaussianBlurFilter
                         filter.setParams(event.radius?.toInt(), event.sigma)
                         try {
@@ -84,7 +80,7 @@ class MainViewModel(
                             Bitmap.createBitmap(defaultBitmap.width, defaultBitmap.height, Bitmap.Config.ARGB_8888)
                         }
                     }
-                    is MainEvent.ApplyFilter.NoParameterFilter -> {
+                    is SamplesEvent.ApplyFilter.NoParameterFilter -> {
                         val filter = filters[filterType]!!
                         try {
                             filter.apply(defaultBitmap)
@@ -94,7 +90,7 @@ class MainViewModel(
                         }
                     }
 
-                    is MainEvent.ApplyFilter.Sharpen -> {
+                    is SamplesEvent.ApplyFilter.Sharpen -> {
                         val filter = filters[filterType] as PSSharpenFilter
                         filter.setParams(event.intensity)
                         try {
@@ -105,7 +101,7 @@ class MainViewModel(
                         }
                     }
 
-                    is MainEvent.ApplyFilter.Saturation -> {
+                    is SamplesEvent.ApplyFilter.Saturation -> {
                         val filter = filters[filterType] as PSSaturationFilter
                         filter.setParams(event.saturation)
                         try {
@@ -116,7 +112,7 @@ class MainViewModel(
                         }
                     }
 
-                    is MainEvent.ApplyFilter.Contrast -> {
+                    is SamplesEvent.ApplyFilter.Contrast -> {
                         val filter = filters[filterType] as PSContrastFilter
                         filter.setParams(event.contrast)
                         try {
@@ -127,7 +123,7 @@ class MainViewModel(
                         }
                     }
 
-                    is MainEvent.ApplyFilter.ZoomBlur -> {
+                    is SamplesEvent.ApplyFilter.ZoomBlur -> {
                         val filter = filters[filterType] as PSZoomBlurFilter
                         filter.setParams(
                             event.intensity,
@@ -142,7 +138,7 @@ class MainViewModel(
                         }
                     }
 
-                    is MainEvent.ApplyFilter.Vignette -> {
+                    is SamplesEvent.ApplyFilter.Vignette -> {
                         val filter = filters[filterType] as PSVignetteFilter
                         val currentColor = filter.getVignetteColor().let { colorInt ->
                             android.graphics.Color.valueOf(colorInt)
@@ -166,7 +162,7 @@ class MainViewModel(
                         }
                     }
 
-                    is MainEvent.ApplyFilter.Bilateral -> {
+                    is SamplesEvent.ApplyFilter.Bilateral -> {
                         val filter = filters[filterType] as PSBilateralFilter
                         filter.setParams(
                             event.spatialSigma,
@@ -181,7 +177,7 @@ class MainViewModel(
                         }
                     }
 
-                    is MainEvent.ApplyFilter.LookUp -> {
+                    is SamplesEvent.ApplyFilter.LookUp -> {
                         val filter = filters[filterType] as PSLookUpFilter
                         filter.setParams(event.intensity)
                         try {
@@ -200,7 +196,7 @@ class MainViewModel(
                     )
                 }
             }
-            MainEvent.ResetFilter -> {
+            SamplesEvent.ResetFilter -> {
                 _state.update {
                     it.copy(
                         bitmap = defaultBitmap,
@@ -221,10 +217,10 @@ class MainViewModel(
                         onSelect = {
                             when (filterType) {
                                 PSFilterType.GAUSSIAN_BLUR -> {
-                                    onEvent(MainEvent.ApplyFilter.GaussianBlur())
+                                    onEvent(SamplesEvent.ApplyFilter.GaussianBlur())
                                 }
                                 else -> {
-                                    onEvent(MainEvent.ApplyFilter.NoParameterFilter(filterType))
+                                    onEvent(SamplesEvent.ApplyFilter.NoParameterFilter(filterType))
                                 }
                             }
                         },
@@ -235,7 +231,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 100f,
                                     onSlide = { radius ->
-                                        onEvent(MainEvent.ApplyFilter.GaussianBlur(radius = radius))
+                                        onEvent(SamplesEvent.ApplyFilter.GaussianBlur(radius = radius))
                                     }
                                 ),
                                 FilterItemState.SliderState(
@@ -243,7 +239,7 @@ class MainViewModel(
                                     min = 0.01f,
                                     max = 100f,
                                     onSlide = { sigma ->
-                                        onEvent(MainEvent.ApplyFilter.GaussianBlur(sigma = sigma))
+                                        onEvent(SamplesEvent.ApplyFilter.GaussianBlur(sigma = sigma))
                                     }
                                 )
                             )
@@ -253,7 +249,7 @@ class MainViewModel(
                                     min = -10f,
                                     max = 10f,
                                     onSlide = { intensity ->
-                                        onEvent(MainEvent.ApplyFilter.Sharpen(intensity = intensity))
+                                        onEvent(SamplesEvent.ApplyFilter.Sharpen(intensity = intensity))
                                     }
                                 ),
                             )
@@ -263,7 +259,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 3f,
                                     onSlide = { saturation ->
-                                        onEvent(MainEvent.ApplyFilter.Saturation(saturation))
+                                        onEvent(SamplesEvent.ApplyFilter.Saturation(saturation))
                                     }
                                 ),
                             )
@@ -274,7 +270,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 3f,
                                     onSlide = { contrast ->
-                                        onEvent(MainEvent.ApplyFilter.Contrast(contrast))
+                                        onEvent(SamplesEvent.ApplyFilter.Contrast(contrast))
                                     }
                                 ),
                             )
@@ -285,7 +281,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 1f,
                                     onSlide = { intensity ->
-                                        onEvent(MainEvent.ApplyFilter.ZoomBlur(intensity = intensity))
+                                        onEvent(SamplesEvent.ApplyFilter.ZoomBlur(intensity = intensity))
                                     }
                                 ),
                                 FilterItemState.SliderState(
@@ -293,7 +289,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 1f,
                                     onSlide = { centerX ->
-                                        onEvent(MainEvent.ApplyFilter.ZoomBlur(blurCenter = Pair(centerX, null)))
+                                        onEvent(SamplesEvent.ApplyFilter.ZoomBlur(blurCenter = Pair(centerX, null)))
                                     }
                                 ),
                                 FilterItemState.SliderState(
@@ -301,7 +297,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 1f,
                                     onSlide = { centerY ->
-                                        onEvent(MainEvent.ApplyFilter.ZoomBlur(blurCenter = Pair(null, centerY)))
+                                        onEvent(SamplesEvent.ApplyFilter.ZoomBlur(blurCenter = Pair(null, centerY)))
                                     }
                                 ),
                                 FilterItemState.SliderState(
@@ -309,7 +305,7 @@ class MainViewModel(
                                     min = 1f,
                                     max = 30f,
                                     onSlide = { samples ->
-                                        onEvent(MainEvent.ApplyFilter.ZoomBlur(samples = samples.toInt()))
+                                        onEvent(SamplesEvent.ApplyFilter.ZoomBlur(samples = samples.toInt()))
                                     }
                                 )
                             )
@@ -320,7 +316,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 1.0f,
                                     onSlide = { start ->
-                                        onEvent(MainEvent.ApplyFilter.Vignette(vignetteStart = start))
+                                        onEvent(SamplesEvent.ApplyFilter.Vignette(vignetteStart = start))
                                     }
                                 ),
                                 FilterItemState.SliderState(
@@ -328,7 +324,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 1.0f,
                                     onSlide = { end ->
-                                        onEvent(MainEvent.ApplyFilter.Vignette(vignetteEnd = end))
+                                        onEvent(SamplesEvent.ApplyFilter.Vignette(vignetteEnd = end))
                                     }
                                 ),
                                 FilterItemState.SliderState(
@@ -336,7 +332,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 1.0f,
                                     onSlide = { x ->
-                                        onEvent(MainEvent.ApplyFilter.Vignette(center = Pair(x, null)))
+                                        onEvent(SamplesEvent.ApplyFilter.Vignette(center = Pair(x, null)))
                                     }
                                 ),
                                 FilterItemState.SliderState(
@@ -344,7 +340,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 1.0f,
                                     onSlide = { y ->
-                                        onEvent(MainEvent.ApplyFilter.Vignette(center = Pair(null, y)))
+                                        onEvent(SamplesEvent.ApplyFilter.Vignette(center = Pair(null, y)))
                                     }
                                 ),
                                 FilterItemState.SliderState(
@@ -352,7 +348,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 1.0f,
                                     onSlide = { r ->
-                                        onEvent(MainEvent.ApplyFilter.Vignette(colorRGB = Triple(r, null, null)))
+                                        onEvent(SamplesEvent.ApplyFilter.Vignette(colorRGB = Triple(r, null, null)))
                                     }
                                 ),
                                 FilterItemState.SliderState(
@@ -360,7 +356,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 1.0f,
                                     onSlide = { g ->
-                                        onEvent(MainEvent.ApplyFilter.Vignette(colorRGB = Triple(null, g, null)))
+                                        onEvent(SamplesEvent.ApplyFilter.Vignette(colorRGB = Triple(null, g, null)))
                                     }
                                 ),
                                 FilterItemState.SliderState(
@@ -368,7 +364,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 1.0f,
                                     onSlide = { b ->
-                                        onEvent(MainEvent.ApplyFilter.Vignette(colorRGB = Triple(null, null, b)))
+                                        onEvent(SamplesEvent.ApplyFilter.Vignette(colorRGB = Triple(null, null, b)))
                                     }
                                 )
                             )
@@ -379,7 +375,7 @@ class MainViewModel(
                                     min = 0.01f,
                                     max = 30f,
                                     onSlide = { sigma ->
-                                        onEvent(MainEvent.ApplyFilter.Bilateral(spatialSigma = sigma))
+                                        onEvent(SamplesEvent.ApplyFilter.Bilateral(spatialSigma = sigma))
                                     }
                                 ),
                                 FilterItemState.SliderState(
@@ -387,7 +383,7 @@ class MainViewModel(
                                     min = 0.01f,
                                     max = 30f,
                                     onSlide = { sigma ->
-                                        onEvent(MainEvent.ApplyFilter.Bilateral(colorSigma = sigma))
+                                        onEvent(SamplesEvent.ApplyFilter.Bilateral(colorSigma = sigma))
                                     }
                                 ),
                                 FilterItemState.SliderState(
@@ -395,7 +391,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 10f,
                                     onSlide = { radius ->
-                                        onEvent(MainEvent.ApplyFilter.Bilateral(radius = radius.toInt()))
+                                        onEvent(SamplesEvent.ApplyFilter.Bilateral(radius = radius.toInt()))
                                     }
                                 )
                             )
@@ -406,7 +402,7 @@ class MainViewModel(
                                     min = 0f,
                                     max = 10f,
                                     onSlide = { intensity ->
-                                        onEvent(MainEvent.ApplyFilter.LookUp(intensity))
+                                        onEvent(SamplesEvent.ApplyFilter.LookUp(intensity))
                                     }
                                 ),
                             )
