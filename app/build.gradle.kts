@@ -39,7 +39,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":filter"))
+    implementation(project(":publish"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

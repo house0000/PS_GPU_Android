@@ -1,10 +1,11 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    id("maven-publish")
 }
 
 android {
-    namespace = "com.psgpu.android.filter"
+    namespace = "com.psgpu.android.publish"
     compileSdk = 36
 
     defaultConfig {
@@ -23,7 +24,6 @@ android {
             )
         }
     }
-
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(17)
@@ -32,7 +32,21 @@ android {
 }
 
 dependencies {
-    implementation(project(":gl"))
-
+    api(project(":filter"))
+    api(project(":gl"))
     implementation(libs.androidx.core.ktx)
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                groupId = "com.github.house0000"
+                artifactId = "publish"
+                version = "1.2.10"
+
+                from(components["release"])
+            }
+        }
+    }
 }
