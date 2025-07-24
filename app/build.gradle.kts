@@ -33,14 +33,13 @@ android {
             languageVersion = JavaLanguageVersion.of(17)
         }
     }
-
     buildFeatures {
         compose = true
     }
 }
 
 dependencies {
-    implementation(project(":publish"))
+    implementation(project(":filter"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
