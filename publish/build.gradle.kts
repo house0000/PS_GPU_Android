@@ -40,9 +40,9 @@ afterEvaluate {
     publishing {
         publications {
             create<MavenPublication>("release") {
-                groupId = "com.ps"
-                artifactId = "gpu"
-                version = "1.2.6"
+                groupId = "com.github.house0000"
+                artifactId = "publish"
+                version = "1.2.7"
 
                 from(components["release"])
             }
