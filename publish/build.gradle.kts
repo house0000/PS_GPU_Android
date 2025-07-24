@@ -42,7 +42,7 @@ publishing {
         create<MavenPublication>("release") {
             groupId = "com.ps"
             artifactId = "psgpu"
-            version = "1.2.0"
+            version = "1.2.2"
 
             afterEvaluate {
                 from(components["release"])
