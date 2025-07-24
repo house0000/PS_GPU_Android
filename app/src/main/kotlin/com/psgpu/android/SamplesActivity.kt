@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
@@ -37,15 +36,15 @@ import com.psgpu.android.filter.PSFilterType
 import com.psgpu.android.ui.filter.FilterItem
 import com.psgpu.android.ui.filter.FilterItemState
 
-data class MainState(
+data class SamplesState(
     val bitmap: Bitmap? = null,
     val selectedFilter: PSFilterType? = null,
     val filters: List<FilterItemState> = emptyList()
 )
 
-sealed class MainEvent {
-    data object ResetFilter: MainEvent()
-    sealed class ApplyFilter(open val filterType: PSFilterType): MainEvent() {
+sealed class SamplesEvent {
+    data object ResetFilter: SamplesEvent()
+    sealed class ApplyFilter(open val filterType: PSFilterType): SamplesEvent() {
         data class NoParameterFilter(override val filterType: PSFilterType): ApplyFilter(filterType)
         data class GaussianBlur(val radius: Float? = null, val sigma: Float? = null): ApplyFilter(PSFilterType.GAUSSIAN_BLUR)
         data class Sharpen(val intensity: Float): ApplyFilter(PSFilterType.SHARPEN)
@@ -74,9 +73,9 @@ sealed class MainEvent {
     }
 }
 
-class MainActivity : ComponentActivity() {
-    private val viewModel: MainViewModel by viewModels {
-        MainViewModel.Factory(application)
+class SamplesActivity : ComponentActivity() {
+    private val viewModel: SamplesViewModel by viewModels {
+        SamplesViewModel.Factory(application)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,8 +95,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun Screen(
-    state: MainState,
-    onEvent: (MainEvent) -> Unit
+    state: SamplesState,
+    onEvent: (SamplesEvent) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -108,7 +107,7 @@ private fun Screen(
 
         // リセットボタン
         ResetButton {
-            onEvent(MainEvent.ResetFilter)
+            onEvent(SamplesEvent.ResetFilter)
         }
 
         // フィルター一覧
@@ -179,7 +178,7 @@ private fun ColumnScope.ResetButton(
 private fun ColumnScope.FilterList(
     filters: List<FilterItemState>,
     selectedFilter: PSFilterType?,
-    onEvent: (MainEvent) -> Unit
+    onEvent: (SamplesEvent) -> Unit
 ) {
     Text("filters:", Modifier.fillMaxWidth())
     Column(
