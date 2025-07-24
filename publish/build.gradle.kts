@@ -43,7 +43,7 @@ afterEvaluate {
     publishing {
         publications {
             create<MavenPublication>("release") {
-                groupId = "com.github.house0000"
+                groupId = "com.ps"
                 artifactId = "psgpu"
                 version = "1.0.0"
 
