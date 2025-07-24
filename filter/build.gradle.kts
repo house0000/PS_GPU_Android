@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    id("maven-publish")
 }
 
 android {
@@ -36,4 +37,18 @@ dependencies {
     implementation(project(":gl"))
 
     implementation(libs.androidx.core.ktx)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("release") {
+            groupId = "com.psgpu"
+            artifactId = "filter"
+            version = "1.0.0"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }
