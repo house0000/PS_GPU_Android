@@ -1,5 +1,6 @@
 # PSGPU-Android
 
+![Image](https://github.com/user-attachments/assets/42bafe6a-be0d-4b12-b48d-737e236873a3)
 
 ## Install
 
@@ -32,7 +33,7 @@ dependencies {
 class MainApplication: Application() {
     override fun onCreate() {
         super.onCreate()
-        PSFilter.init(this)
+        PSFilter.init(this) // Add
     }
 }
 ```
