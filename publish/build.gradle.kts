@@ -35,7 +35,6 @@ android {
 
 dependencies {
     api(project(":filter"))
-    api(project(":gl"))
 }
 
 // ファイルの末尾に以下を追記
