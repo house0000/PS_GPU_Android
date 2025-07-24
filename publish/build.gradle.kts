@@ -4,8 +4,6 @@ plugins {
     id("maven-publish")
 }
 
-group = ""
-
 android {
     namespace = "com.psgpu.android.publish"
     compileSdk = 36
