@@ -2,15 +2,15 @@ package com.psgpu.android.filter
 
 import android.graphics.Bitmap
 import android.opengl.GLES20
-import com.psgpu.android.gl.GLES20CreateEmptyTextureObject
-import com.psgpu.android.gl.GLES20CreateFBOColorAttachedTexture2D
-import com.psgpu.android.gl.GLES20CreateIBO
-import com.psgpu.android.gl.GLES20CreateLinkedProgram
-import com.psgpu.android.gl.GLES20CreateVBO
-import com.psgpu.android.gl.model.PSFBO
-import com.psgpu.android.gl.model.PSGLObjects
-import com.psgpu.android.gl.model.PSTextureObject
-import com.psgpu.android.gl.readShaderFile
+import com.psgpu.android.filter.gl.GLES20CreateEmptyTextureObject
+import com.psgpu.android.filter.gl.GLES20CreateFBOColorAttachedTexture2D
+import com.psgpu.android.filter.gl.GLES20CreateIBO
+import com.psgpu.android.filter.gl.GLES20CreateLinkedProgram
+import com.psgpu.android.filter.gl.GLES20CreateVBO
+import com.psgpu.android.filter.gl.model.PSFBO
+import com.psgpu.android.filter.gl.model.PSGLObjects
+import com.psgpu.android.filter.gl.model.PSTextureObject
+import com.psgpu.android.filter.gl.readShaderFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer

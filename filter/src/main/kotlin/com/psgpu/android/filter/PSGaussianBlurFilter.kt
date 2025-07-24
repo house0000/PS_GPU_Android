@@ -5,7 +5,7 @@ import androidx.annotation.FloatRange
 import com.psgpu.android.filter.template.PSTemplateFilter
 import com.psgpu.android.filter.template.PSTemplateFilterParams
 import com.psgpu.android.filter.template.PSUniformParam
-import com.psgpu.android.gl.model.PSTextureObject
+import com.psgpu.android.filter.gl.model.PSTextureObject
 
 /**
  * Gaussian Blur Filter

@@ -22,4 +22,3 @@ dependencyResolutionManagement {
 rootProject.name = "psgpu_android"
 include(":app")
 include(":filter")
-include(":gl")

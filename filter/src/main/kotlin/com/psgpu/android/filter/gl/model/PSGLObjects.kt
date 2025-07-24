@@ -1,4 +1,4 @@
-package com.psgpu.android.gl.model
+package com.psgpu.android.filter.gl.model
 
 import android.opengl.EGL14
 import android.opengl.EGLConfig
@@ -6,7 +6,6 @@ import android.opengl.EGLContext
 import android.opengl.EGLDisplay
 import android.opengl.EGLSurface
 import android.opengl.GLES20
-import java.nio.IntBuffer
 
 /**
  * GL関連のインスタンスは手動でリリースしないといけないので、リリースを担ってくれるオブジェクトを作っておく。

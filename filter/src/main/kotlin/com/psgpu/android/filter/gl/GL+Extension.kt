@@ -1,12 +1,12 @@
-package com.psgpu.android.gl
+package com.psgpu.android.filter.gl
 
 import android.graphics.Bitmap
 import android.opengl.EGL14
 import android.opengl.EGLConfig
 import android.opengl.GLES20
 import androidx.annotation.IntRange
-import com.psgpu.android.gl.model.PSEGLContextObjects
-import com.psgpu.android.gl.model.PSGLProgramObjects
+import com.psgpu.android.filter.gl.model.PSEGLContextObjects
+import com.psgpu.android.filter.gl.model.PSGLProgramObjects
 import java.nio.Buffer
 import java.nio.ByteBuffer
 

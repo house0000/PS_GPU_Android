@@ -33,8 +33,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":gl"))
-
     implementation(libs.androidx.core.ktx)
 }
 

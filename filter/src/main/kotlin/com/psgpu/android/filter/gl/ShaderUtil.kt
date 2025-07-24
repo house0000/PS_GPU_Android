@@ -1,4 +1,4 @@
-package com.psgpu.android.gl
+package com.psgpu.android.filter.gl
 
 import android.content.Context
 import java.io.BufferedReader

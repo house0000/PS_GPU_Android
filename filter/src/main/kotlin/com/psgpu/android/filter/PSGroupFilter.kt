@@ -1,11 +1,10 @@
 package com.psgpu.android.filter
 
 import android.graphics.Bitmap
-import com.psgpu.android.filter.PSFilter.Companion.eglContextExist
-import com.psgpu.android.gl.GLES20GetTextureAttachedToFBO
-import com.psgpu.android.gl.model.PSFBO
-import com.psgpu.android.gl.model.PSGLObjects
-import com.psgpu.android.gl.model.PSTextureObject
+import com.psgpu.android.filter.gl.GLES20GetTextureAttachedToFBO
+import com.psgpu.android.filter.gl.model.PSFBO
+import com.psgpu.android.filter.gl.model.PSGLObjects
+import com.psgpu.android.filter.gl.model.PSTextureObject
 
 /**
  * 複数のフィルターをまとめてかけられるフィルター

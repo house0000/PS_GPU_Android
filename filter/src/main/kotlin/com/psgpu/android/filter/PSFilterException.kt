@@ -1,6 +1,6 @@
 package com.psgpu.android.filter
 
-import com.psgpu.android.gl.PSGLException
+import com.psgpu.android.filter.gl.PSGLException
 
 /** フィルターのエラー */
 sealed class PSFilterException: Exception() {

@@ -1,4 +1,4 @@
-package com.psgpu.android.gl
+package com.psgpu.android.filter.gl
 
 sealed class PSGLException: Exception() {
     data object EGLNoDisplay: PSGLException() {
