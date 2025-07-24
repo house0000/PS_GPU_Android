@@ -4,6 +4,8 @@ plugins {
     id("maven-publish")
 }
 
+group = ""
+
 android {
     namespace = "com.psgpu.android.publish"
     compileSdk = 36
@@ -37,15 +39,14 @@ dependencies {
     api(project(":filter"))
 }
 
-// ファイルの末尾に以下を追記
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                groupId = "com.ps"
-                artifactId = "psgpu"
-                version = "1.0.0"
+publishing {
+    publications {
+        create<MavenPublication>("release") {
+            groupId = "com.ps"
+            artifactId = "psgpu"
+            version = "1.0.0"
 
+            afterEvaluate {
                 from(components["release"])
             }
         }
