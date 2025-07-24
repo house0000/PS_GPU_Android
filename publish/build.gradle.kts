@@ -40,9 +40,9 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("release") {
-            groupId = "com.ps"
-            artifactId = "psgpu"
-            version = "1.2.2"
+            groupId = "com.github.house0000"
+            artifactId = "publish"
+            version = "1.2.3"
 
             afterEvaluate {
                 from(components["release"])
