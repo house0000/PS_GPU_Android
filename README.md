@@ -20,7 +20,7 @@ dependencyResolutionManagement {
 
 dependencies {
     // Add
-    implementation("com.github.house0000:PS_GPU_Android:1.0.0")
+    implementation("com.github.house0000:PS_GPU_Android:version")
 }
 ```
 
