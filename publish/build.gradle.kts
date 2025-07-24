@@ -42,7 +42,7 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 groupId = "com.github.house0000"
                 artifactId = "publish"
-                version = "1.2.7"
+                version = "1.2.8"
 
                 from(components["release"])
             }
