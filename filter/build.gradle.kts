@@ -37,3 +37,17 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
 }
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                groupId = "com.github.house0000"
+                artifactId = "filter"
+                version = "1.2.9"
+
+                from(components["release"])
+            }
+        }
+    }
+}
