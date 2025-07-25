@@ -91,7 +91,12 @@ assets/
     └── Custom.vsh
 ```
 
-
-
 ## Samples
 Run this project.
+
+
+# Main Reference
+- "Open GL ES 2.0 プログラミングガイド" Aaftab Munshi (著), Dan Ginsburg (著), Dave Shreiner (著), アフタブ・ムンシ (著), ダン・ギンズバーグ (著), デーブ・シュライナー (著)
+- https://wgld.org/
+- https://github.com/cats-oss/android-gpuimage
+
