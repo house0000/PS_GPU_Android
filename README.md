@@ -76,7 +76,7 @@ class PSCustomFilter(
 
     override fun setupCustomUniformParams(width: Int, height: Int) {
         params.uniformParams = listOf(
-            PSUniformParam.F1("u_myParam", saturation)
+            PSUniformParam.F1("u_myParam", myParam)
         )
     }
 
